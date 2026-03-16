@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Home, Dumbbell, Apple, Activity, BookOpen, PlayCircle, Clock, Info,
   ShieldAlert, Zap, Flame, Plus, Trash2, LineChart, Timer, X,
-  Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight
+  Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight, ActivitySquare
 } from 'lucide-react';
 
 // --- DATA MASTER: ESTRUCTURA DEL PLAN ---
@@ -54,7 +54,7 @@ const SCHEDULE = [
   { day: "Miércoles", type: "Empuje (B)", target: "Pectoral / Gineco", time: "4AM / 7PM", exercises: BLOCK_B, hasWarmup: true },
   { day: "Jueves", type: "Pierna & Core (A)", target: "Salud Pélvica", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
   { day: "Viernes", type: "Tracción (C) + HIIT", target: "Postura / GH", time: "4AM / 7PM", exercises: BLOCK_C, hasWarmup: true, hasHIIT: true },
-  { day: "Sábado", type: "Resistencia 10k", target: "Salud Cardíaca", time: "Mañana", isRunning: true, zone: "125-145 ppm", duration: "80-100 min" },
+  { day: "Sábado", type: "Carrera Larga Controlada", target: "Base Aeróbica", time: "Mañana", isRunning: true, zone: "115-135 ppm", duration: "60-75 min", notes: "LÍMITE CORTISOL: No exceder los 75 min. Mantener FC controlada." },
   { day: "Domingo", type: "Movilidad Activa", target: "Cortisol", time: "Mañana", isMobility: true },
 ];
 
@@ -160,6 +160,12 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
               <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-2xl font-black">{dayData.duration}</p></div>
               <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-2xl font-black">{dayData.zone}</p></div>
             </div>
+            {dayData.notes && (
+              <div className="mt-5 bg-red-500/20 border border-red-400/50 p-4 rounded-2xl flex items-start">
+                <ShieldAlert size={18} className="text-red-200 mr-3 shrink-0 mt-0.5" />
+                <p className="text-[11px] font-bold text-red-100 leading-snug tracking-wide">{dayData.notes}</p>
+              </div>
+            )}
           </div>
           
           <SectionHeader icon={Zap}>Fase 1: Preparación (10 min)</SectionHeader>
@@ -218,8 +224,21 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
                 <p className="text-[10px] text-red-200 mt-2 tracking-[0.2em] uppercase">Objetivo: Frecuencia Cardíaca {">"} 155 PPM</p>
              </div>
              <div className="grid gap-4">
-               <div className="flex items-center space-x-5 bg-red-700/50 p-5 rounded-[28px] border border-red-400/20 shadow-sm transition-transform active:scale-95"><ArrowRight size={24} className="text-red-300"/><p className="text-xs uppercase tracking-tight">30 seg: Sprints (High Knees) o Shadow Boxing explosivo.</p></div>
-               <div className="flex items-center space-x-5 bg-slate-900/40 p-5 rounded-[28px] border border-slate-700/50 shadow-sm transition-transform active:scale-95"><ArrowRight size={24} className="text-slate-300"/><p className="text-xs uppercase tracking-tight">60 seg: Marcha suave activa para recuperación parcial.</p></div>
+               <div className="bg-red-700/50 p-5 rounded-[28px] border border-red-400/20 shadow-sm">
+                 <div className="flex items-start space-x-5 mb-3">
+                   <ArrowRight size={24} className="text-red-300 shrink-0"/>
+                   <p className="text-xs uppercase tracking-tight">30 seg: Sprints (High Knees) o Shadow Boxing explosivo.</p>
+                 </div>
+                 <div className="flex flex-wrap gap-2 ml-11">
+                   <a href="https://www.youtube.com/results?search_query=High+Knees+exercise+form" target="_blank" rel="noopener noreferrer" className="flex items-center bg-red-900/50 text-white px-3 py-1.5 rounded-xl text-[9px] uppercase tracking-widest active:bg-red-800 transition-colors">
+                     <PlayCircle size={14} className="mr-1.5" /> High Knees
+                   </a>
+                   <a href="https://www.youtube.com/results?search_query=Shadow+Boxing+workout" target="_blank" rel="noopener noreferrer" className="flex items-center bg-red-900/50 text-white px-3 py-1.5 rounded-xl text-[9px] uppercase tracking-widest active:bg-red-800 transition-colors">
+                     <PlayCircle size={14} className="mr-1.5" /> Shadow Boxing
+                   </a>
+                 </div>
+               </div>
+               <div className="flex items-center space-x-5 bg-slate-900/40 p-5 rounded-[28px] border border-slate-700/50 shadow-sm transition-transform active:scale-95"><ArrowRight size={24} className="text-slate-300 shrink-0"/><p className="text-xs uppercase tracking-tight">60 seg: Marcha suave activa para recuperación parcial.</p></div>
              </div>
           </div>
         </div>
@@ -252,6 +271,7 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
 
 export default function App() {
   const [tab, setTab] = useState('home');
+  const [statTab, setStatTab] = useState('bio'); // 'bio' o 'cardio'
   const [selectedDay, setSelectedDay] = useState(null);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -260,7 +280,12 @@ export default function App() {
   const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_1')) || []);
   const [form, setForm] = useState({ weight: '', waist: '', iah: '', erec: 'Sí' });
 
+  // Persistencia Cardio
+  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v1')) || []);
+  const [cardioForm, setCardioForm] = useState({ distance: '', time: '', hr: '' });
+
   useEffect(() => localStorage.setItem('f_logs_v_final_1', JSON.stringify(logs)), [logs]);
+  useEffect(() => localStorage.setItem('f_cardio_logs_v1', JSON.stringify(cardioLogs)), [cardioLogs]);
 
   useEffect(() => {
     let int = null;
@@ -278,6 +303,25 @@ export default function App() {
     if(!form.weight && !form.iah) return;
     setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form }, ...logs]);
     setForm({ weight: '', waist: '', iah: '', erec: 'Sí' });
+  };
+
+  const saveCardio = () => {
+    if(!cardioForm.distance || !cardioForm.time) return;
+    
+    // Calculo de ritmo (Pace) min/km
+    const d = parseFloat(cardioForm.distance);
+    const t = parseFloat(cardioForm.time);
+    let paceFormatted = "0:00";
+    
+    if(d > 0 && t > 0) {
+      const rawPace = t / d;
+      const mins = Math.floor(rawPace);
+      const secs = Math.round((rawPace - mins) * 60).toString().padStart(2, '0');
+      paceFormatted = `${mins}:${secs}`;
+    }
+
+    setCardioLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...cardioForm, pace: paceFormatted }, ...cardioLogs]);
+    setCardioForm({ distance: '', time: '', hr: '' });
   };
 
   const handleCalendar = (day) => {
@@ -360,12 +404,20 @@ export default function App() {
                <div><h3 className="font-black text-slate-900 uppercase text-base tracking-tight leading-none">Sólidos (~100g)</h3><p className="text-[13px] text-slate-400 font-bold leading-tight mt-2 italic text-slate-500">3 huevos enteros (desayuno) + 200g proteína magra en las comidas principales. Prioriza brócoli y coliflor.</p></div>
             </div>
 
+            <div className="bg-white p-8 rounded-[45px] border border-slate-100 shadow-sm flex items-center group transition-all active:bg-slate-50">
+               <div className="bg-blue-50 p-5 rounded-[30px] mr-7 shrink-0 shadow-inner border border-blue-100"><Activity className="text-blue-500" size={40}/></div>
+               <div>
+                  <h3 className="font-black text-slate-900 uppercase text-base tracking-tight leading-none">Isolate (~50g)</h3>
+                  <p className="text-[13px] text-slate-500 font-bold leading-tight mt-2 italic">1 scoop post-entreno y 1 scoop a las 4:00 PM (con AGUA). Cero lactosa para evitar picos de estrógenos.</p>
+               </div>
+            </div>
+
             <div className="bg-slate-900 p-10 rounded-[55px] text-white shadow-2xl border border-slate-800">
                <SectionHeader color="text-emerald-400" icon={Zap}>Stack de Suplementación</SectionHeader>
                <div className="grid grid-cols-2 gap-6 mt-8">
                  {[ 
                    { n: 'Zinc', v: '50mg', l: 'Anti-Aromatasa' },
-                   { n: 'Citrulina', v: '6g', l: 'Vasodilatación' },
+                   { n: 'Citrulina', v: '6g', l: 'Óxido Nítrico' },
                    { n: 'Magnesio', v: '400mg', l: 'Recuperación' },
                    { n: 'D3+K2', v: '5000 UI', l: 'Hormona Base' }
                  ].map((s, i) => (
@@ -380,53 +432,119 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB: MÉTRICAS */}
+        {/* TAB: SEGUIMIENTO (MÉTRICAS + CARDIO) */}
         {tab === 'stats' && (
-          <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
-            <div className="bg-white rounded-[50px] border border-slate-100 p-10 shadow-sm">
-              <SectionHeader icon={LineChart}>Monitoreo Biométrico</SectionHeader>
-              <div className="grid grid-cols-2 gap-6 mb-10">
-                <div className="space-y-2 col-span-1">
-                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Peso (kg)</label>
-                  <input type="number" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                </div>
-                <div className="space-y-2 col-span-1">
-                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Cintura (cm)</label>
-                  <input type="number" value={form.waist} onChange={e=>setForm({...form, waist:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                </div>
-                <div className="space-y-2 col-span-1">
-                  <label className="text-[11px] font-black text-indigo-500 uppercase ml-4 tracking-[0.3em]">IAH (CPAP)</label>
-                  <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
-                </div>
-                <div className="space-y-2 col-span-1">
-                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Erección</label>
-                  <select value={form.erec} onChange={e=>setForm({...form, erec:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-sm font-black outline-none appearance-none text-center shadow-inner bg-no-repeat">
-                    <option>Sí</option><option>No</option>
-                  </select>
-                </div>
-                <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-7 rounded-[30px] font-black text-sm active:scale-95 shadow-[0_20px_40px_rgba(16,185,129,0.3)] uppercase tracking-[0.4em] mt-6 transition-all border-b-8 border-emerald-800">
-                  Registrar Avance
-                </button>
-              </div>
-
-              {logs.length > 0 && (
-                <div className="mt-12 overflow-hidden rounded-[40px] border border-slate-100 shadow-2xl bg-white">
-                  <table className="w-full text-left text-[12px]">
-                    <thead className="bg-slate-900 text-white font-black uppercase tracking-[0.15em]"><tr className="border-b border-slate-800">
-                      <th className="p-5 text-center">Fecha</th><th className="p-5 text-center">Kg</th><th className="p-5 text-center">IAH</th><th className="p-5 text-center">Erec.</th>
-                    </tr></thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {logs.map(l => <tr key={l.id} className="font-black text-slate-700 active:bg-slate-50 transition-colors">
-                        <td className="p-5 text-center text-slate-400 font-bold tracking-tighter">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
-                        <td className="p-5 text-center text-emerald-600 font-black italic tracking-tighter">{l.weight}k</td>
-                        <td className="p-5 text-center text-indigo-600 tracking-tighter">{l.iah || '-'}</td>
-                        <td className="p-5 text-center uppercase text-[10px] tracking-widest">{l.erec}</td>
-                      </tr>)}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+          <div className="space-y-6 animate-fade-in pb-12 text-slate-900">
+            
+            {/* TABS INTERNAS DE SEGUIMIENTO */}
+            <div className="bg-slate-200/50 p-1.5 rounded-full flex mx-auto max-w-[280px] shadow-inner mb-8">
+              <button onClick={() => setStatTab('bio')} className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'bio' ? 'bg-white text-emerald-600 shadow-[0_4px_10px_rgba(0,0,0,0.05)] scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Biometría</button>
+              <button onClick={() => setStatTab('cardio')} className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'cardio' ? 'bg-white text-emerald-600 shadow-[0_4px_10px_rgba(0,0,0,0.05)] scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Cardio Z2</button>
             </div>
+
+            {/* SECCIÓN 1: BIOMETRÍA */}
+            {statTab === 'bio' && (
+              <div className="bg-white rounded-[35px] border border-slate-100 p-6 shadow-sm animate-fade-in">
+                <SectionHeader icon={LineChart}>Métricas de Salud</SectionHeader>
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.2em]">Peso (kg)</label>
+                    <input type="number" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.2em]">Cintura (cm)</label>
+                    <input type="number" value={form.waist} onChange={e=>setForm({...form, waist:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-indigo-500 uppercase ml-2 tracking-[0.2em]">IAH (CPAP)</label>
+                    <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.2em]">Erección</label>
+                    <select value={form.erec} onChange={e=>setForm({...form, erec:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none appearance-none text-center shadow-inner bg-no-repeat">
+                      <option>Sí</option><option>No</option>
+                    </select>
+                  </div>
+                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-3.5 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-2 border-emerald-800">
+                    Registrar Salud
+                  </button>
+                </div>
+
+                {logs.length > 0 && (
+                  <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 shadow-sm bg-white">
+                    <table className="w-full text-left text-[11px]">
+                      <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
+                        <tr className="border-b border-slate-800">
+                          <th className="px-2 py-3 text-center">Fecha</th>
+                          <th className="px-2 py-3 text-center">Kg</th>
+                          <th className="px-2 py-3 text-center">IAH</th>
+                          <th className="px-2 py-3 text-center">Erec.</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50 transition-colors">
+                          <td className="px-2 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
+                          <td className="px-2 py-3 text-center text-emerald-600 italic tracking-tight">{l.weight}</td>
+                          <td className="px-2 py-3 text-center text-indigo-600 tracking-tight">{l.iah || '-'}</td>
+                          <td className="px-2 py-3 text-center uppercase">{l.erec}</td>
+                        </tr>)}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECCIÓN 2: CARDIO Y RITMO ZONA 2 */}
+            {statTab === 'cardio' && (
+              <div className="bg-white rounded-[35px] border border-slate-100 p-6 shadow-sm animate-fade-in">
+                <SectionHeader icon={ActivitySquare} color="text-orange-500">Progreso Zona 2</SectionHeader>
+                <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100 mb-6 shadow-inner">
+                   <p className="text-[10px] text-orange-800 font-bold text-center italic">"La meta no es correr más rápido, es recorrer más distancia manteniendo la misma frecuencia cardíaca (Zona 2)."</p>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2 mb-6">
+                  <div className="space-y-1 col-span-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-[0.1em]">Dist. (km)</label>
+                    <input type="number" step="0.01" value={cardioForm.distance} onChange={e=>setCardioForm({...cardioForm, distance:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder="5.0" />
+                  </div>
+                  <div className="space-y-1 col-span-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-[0.1em]">Tiem. (min)</label>
+                    <input type="number" value={cardioForm.time} onChange={e=>setCardioForm({...cardioForm, time:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder="45" />
+                  </div>
+                  <div className="space-y-1 col-span-1">
+                    <label className="text-[9px] font-black text-red-500 uppercase ml-1 tracking-[0.1em]">FC (ppm)</label>
+                    <input type="number" value={cardioForm.hr} onChange={e=>setCardioForm({...cardioForm, hr:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-red-500 transition-all text-center shadow-inner font-mono text-red-600" placeholder="115" />
+                  </div>
+                  <button onClick={saveCardio} className="col-span-3 bg-orange-500 text-white p-3.5 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-orange-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-2 border-orange-700">
+                    Registrar Carrera
+                  </button>
+                </div>
+
+                {cardioLogs.length > 0 && (
+                  <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 shadow-sm bg-white">
+                    <table className="w-full text-left text-[11px]">
+                      <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
+                        <tr className="border-b border-slate-800">
+                          <th className="px-2 py-3 text-center">Fecha</th>
+                          <th className="px-2 py-3 text-center">Dist</th>
+                          <th className="px-2 py-3 text-center text-orange-400">Ritmo</th>
+                          <th className="px-2 py-3 text-center text-red-400">PPM</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {cardioLogs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50 transition-colors">
+                          <td className="px-2 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
+                          <td className="px-2 py-3 text-center tracking-tight">{l.distance}km</td>
+                          <td className="px-2 py-3 text-center text-orange-600 font-black italic tracking-tighter">{l.pace} <span className="text-[8px] opacity-60">/km</span></td>
+                          <td className="px-2 py-3 text-center text-red-600">{l.hr || '-'}</td>
+                        </tr>)}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -477,13 +595,13 @@ export default function App() {
             { id: 'home', icon: Home, label: 'Inicio' },
             { id: 'workout', icon: Dumbbell, label: 'Entreno' },
             { id: 'diet', icon: Apple, label: 'Dieta' },
-            { id: 'stats', icon: Activity, label: 'Logs' },
+            { id: 'stats', icon: Activity, label: 'Seguimiento' },
             { id: 'guide', icon: BookOpen, label: 'Guía' }
           ].map((item) => (
             <button key={item.id} onClick={() => {setTab(item.id); setSelectedDay(null);}} className={`flex flex-col items-center justify-center flex-1 py-8 transition-all duration-700 ${tab === item.id ? 'text-emerald-400 -translate-y-3 scale-110' : 'text-slate-600 opacity-60 hover:opacity-100'}`}>
               <item.icon size={28} className={tab === item.id ? "drop-shadow-[0_0_12px_rgba(52,211,153,0.6)]" : ""} />
-              <span className="text-[10px] mt-2.5 font-black tracking-[0.25em] uppercase">{item.label}</span>
-              {tab === item.id && <div className="w-2 h-2 bg-emerald-400 rounded-full mt-2 shadow-[0_0_10px_rgba(52,211,153,1)]"></div>}
+              <span className="text-[9px] mt-3 font-black tracking-[0.25em] uppercase">{item.label}</span>
+              {tab === item.id && <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full mt-2.5 shadow-[0_0_15px_rgba(52,211,153,1)] animate-pulse"></div>}
             </button>
           ))}
         </div>
