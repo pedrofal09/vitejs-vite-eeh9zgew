@@ -1,259 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, 
-  Dumbbell, 
-  Apple, 
-  Activity, 
-  BookOpen, 
-  PlayCircle, 
-  Clock, 
-  Info,
-  ShieldAlert,
-  Moon,
-  Zap,
-  Flame,
-  Plus,
-  Trash2,
-  LineChart,
-  Timer,
-  X,
-  Pause,
-  Play,
-  CalendarPlus,
-  Watch
+  Home, Dumbbell, Apple, Activity, BookOpen, PlayCircle, Clock, Info,
+  ShieldAlert, Zap, Flame, Plus, Trash2, LineChart, Timer, X,
+  Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight
 } from 'lucide-react';
 
-// --- DATOS MAESTROS: Ejercicios y Rutinas ---
-const WARMUP_ROUTINE = [
-  { name: "Marcha rápida o Shadow Boxing", duration: "2-3 min", desc: "Elevar frecuencia cardíaca sin impacto." },
-  { name: "Rotaciones de Hombros", duration: "15 fwd / 15 back", desc: "Prepara manguitos rotadores." },
-  { name: "Aperturas de Pecho", duration: "15 reps", desc: "Aperturas explosivas hacia atrás." },
-  { name: "Balanceo de Piernas", duration: "10/pierna", desc: "Adelante y atrás como péndulo." },
-  { name: "Puente de Glúteo", duration: "15 reps", desc: "Activa glúteos para sentadilla." },
-  { name: "Bird-Dog (Core)", duration: "5/lado", desc: "Activa faja natural." }
+// --- DATA MASTER: ESTRUCTURA DEL PLAN ---
+
+const WARMUP_WEIGHTS = [
+  { name: "Elevación Térmica", duration: "3 min", desc: "Marcha rápida o Shadow Boxing ligero para activar el sistema nervioso." },
+  { name: "Movilidad Articular", duration: "3 min", desc: "Rotaciones hombros (15/lado) + Aperturas pecho dinámicas." },
+  { name: "Activación Core/Base", duration: "2 min", desc: "Bird-Dog (5/lado) + Puente de glúteo (15 reps) para proteger la diástasis." }
+];
+
+const RUNNING_WARMUP = [
+  { name: "Movilidad Activa", duration: "5 min", desc: "Círculos de tobillo, balanceo de piernas y rotación de cadera." },
+  { name: "Trote Progresivo", duration: "5 min", desc: "Iniciar caminando rápido y subir paulatinamente a trote muy suave." }
+];
+
+const RUNNING_COOLDOWN = [
+  { name: "Vuelta a la Calma", duration: "5 min", desc: "Caminata lenta hasta bajar pulsaciones por debajo de 100 bpm." },
+  { name: "Estiramiento Estático", duration: "5 min", desc: "Foco en gemelos, psoas e isquiotibiales (30 seg por posición)." }
 ];
 
 const BLOCK_A = [
-  { name: "Sentadilla con Barra Libre", sets: 4, reps: "8-10", tempo: "3-1-2-1", rest: "120s", yt: "Barbell back squat proper form", notes: "Exhala y mete el ombligo al subir. Bajar hasta romper el paralelo." },
-  { name: "Hip Thrust con Barra", sets: 4, reps: "10-12", tempo: "2-0-X-2", rest: "90s", yt: "Barbell hip thrust form", notes: "Usa banco y colchoneta en cadera. Empuje explosivo." },
-  { name: "Sentadilla Búlgara", sets: 3, reps: "10-12/pierna", tempo: "3-1-2-1", rest: "60s", yt: "Dumbbell Bulgarian Split Squat proper form", notes: "Apoya empeine atrás. Equilibra fuerza." },
-  { name: "Curl de Isquiotibiales (Mancuerna)", sets: 3, reps: "12-15", tempo: "3-1-2-1", rest: "60s", yt: "Dumbbell lying leg curl bench", notes: "Acostado boca abajo en banco." },
-  { name: "Elevación de Talones", sets: 4, reps: "15-20", tempo: "2-1-1-2", rest: "60s", yt: "Standing calf raise form", notes: "Con barra o mancuernas." },
-  { name: "Toques de Talón (Heel Taps)", sets: 3, reps: "10-12/pierna", tempo: "Muy lento", rest: "45s", yt: "Heel taps for diastasis recti safe core", notes: "Core terapéutico." }
+  { name: "Sentadilla con Barra Libre", sets: 4, reps: "8-10", tempo: "3-1-2-1", rest: "120", yt: "Barbell back squat proper form", notes: "MOTOR DE TESTOSTERONA. Exhala y mete el ombligo al subir." },
+  { name: "Hip Thrust con Barra", sets: 4, reps: "10-12", tempo: "2-0-X-2", rest: "90", yt: "Barbell hip thrust form", notes: "Usa banco y colchoneta en cadera. Empuje explosivo." },
+  { name: "Sentadilla Búlgara", sets: 3, reps: "10-12/p", tempo: "3-1-2-1", rest: "60", yt: "Dumbbell Bulgarian Split Squat", notes: "Apoya empeine atrás. Equilibra fuerza unilateral." },
+  { name: "Curl de Isquiotibiales", sets: 3, reps: "12-15", tempo: "3-1-2-1", rest: "60", yt: "Dumbbell lying leg curl bench", notes: "Acuéstate boca abajo en el banco." },
+  { name: "Elevación de Talones", sets: 4, reps: "15-20", tempo: "2-1-1-2", rest: "60", yt: "Standing calf raise form", notes: "" },
+  { name: "Toques de Talón (Heel Taps)", sets: 3, reps: "10-12/p", tempo: "Muy lento", rest: "45", yt: "Heel taps diastasis recti safe core", notes: "Core terapéutico para cerrar diástasis." }
 ];
 
 const BLOCK_B = [
-  { name: "Press Inclinado con Barra/Mancuernas", sets: 4, reps: "8-10", tempo: "3-1-2-1", rest: "90s", yt: "Incline dumbbell press form", notes: "Banco a 30-45 grados. Empuja exhalando." },
-  { name: "Aperturas Inclinadas", sets: 3, reps: "10-12", tempo: "3-1-2-1", rest: "90s", yt: "Incline dumbbell chest fly form", notes: "Expansión torácica." },
-  { name: "Press Militar Sentado", sets: 3, reps: "10-12", tempo: "Regular", rest: "90s", yt: "Seated dumbbell shoulder press form", notes: "Respaldo a 90 grados para proteger lumbar." },
-  { name: "Elevaciones Laterales", sets: 4, reps: "12-15", tempo: "2-0-1-1", rest: "60s", yt: "Dumbbell lateral raise form", notes: "Hombro medio." },
-  { name: "Rompecráneos (Skullcrushers)", sets: 3, reps: "12-15", tempo: "2-0-1-1", rest: "60s", yt: "Dumbbell skullcrushers form", notes: "Lleva mancuernas hacia orejas y extiende." }
+  { name: "Press Inclinado (Barra/Manc.)", sets: 4, reps: "8-10", tempo: "3-1-2-1", rest: "90", yt: "Incline dumbbell press form", notes: "Ataca la Ginecomastia. Banco a 30-45 grados." },
+  { name: "Aperturas Inclinadas", sets: 3, reps: "10-12", tempo: "3-1-2-1", rest: "90", yt: "Incline dumbbell fly", notes: "Expansión torácica." },
+  { name: "Press Militar Sentado", sets: 3, reps: "10-12", tempo: "Regular", rest: "90", yt: "Seated shoulder press dumbbell", notes: "Respaldo a 90 grados para proteger lumbar." },
+  { name: "Elevaciones Laterales", sets: 4, reps: "12-15", tempo: "2-0-1-1", rest: "60", yt: "Dumbbell lateral raise", notes: "" },
+  { name: "Rompecráneos", sets: 3, reps: "12-15", tempo: "2-0-1-1", rest: "60", yt: "Dumbbell skullcrushers", notes: "Codos cerrados." }
 ];
 
 const BLOCK_C = [
-  { name: "Remo a Una Mano en Banco", sets: 4, reps: "10-12/brazo", tempo: "2-1-2-1", rest: "90s", yt: "Single arm dumbbell row bench form", notes: "Espalda paralela al suelo. Cero estrés lumbar." },
-  { name: "Pull-over con Mancuerna", sets: 3, reps: "10-12", tempo: "3-1-2-1", rest: "90s", yt: "Dumbbell pullover chest and lats", notes: "Excelente para ginecomastia y expansión." },
-  { name: "Pájaros Acostado (Banco Inclinado)", sets: 3, reps: "15", tempo: "2-0-2-2", rest: "60s", yt: "Chest supported incline reverse fly", notes: "Corrige postura/hombros caídos." },
-  { name: "Curl de Bíceps Alterno", sets: 3, reps: "10-12/brazo", tempo: "2-0-1-1", rest: "60s", yt: "Alternating dumbbell bicep curl form", notes: "" },
-  { name: "Bird-Dog (Estabilización)", sets: 3, reps: "10/lado", tempo: "2-1-2-1", rest: "45s", yt: "Bird dog exercise diastasis recti safe", notes: "Mantener core firme." }
+  { name: "Remo a Una Mano (Banco)", sets: 4, reps: "10-12/b", tempo: "2-1-2-1", rest: "90", yt: "Single arm dumbbell row bench", notes: "Espalda paralela al suelo. Cero estrés lumbar." },
+  { name: "Pull-over con Mancuerna", sets: 3, reps: "10-12", tempo: "3-1-2-1", rest: "90", yt: "Dumbbell pullover chest lats", notes: "Excelente para ginecomastia." },
+  { name: "Pájaros (Banco Inclinado)", sets: 3, reps: "15", tempo: "2-0-2-2", rest: "60", yt: "Chest supported reverse fly", notes: "Corrige postura y hombros caídos." },
+  { name: "Curl de Bíceps Alterno", sets: 3, reps: "10-12/b", tempo: "2-0-1-1", rest: "60", yt: "Alternating bicep curl", notes: "" },
+  { name: "Bird-Dog (Estabilización)", sets: 3, reps: "10/lado", tempo: "2-1-2-1", rest: "45", yt: "Bird dog exercise diastasis safe", notes: "" }
 ];
 
 const SCHEDULE = [
-  { day: "Lunes", type: "Bloque A: Tren Inferior", time: "4AM/7PM", exercises: BLOCK_A, warmup: true, target: "Estímulo de Testosterona" },
-  { day: "Martes", type: "Cardio Zona 2", time: "4AM/7PM", desc: "45-60 min trote/bici. FC: 105-123 ppm.", target: "Quema Grasa Visceral" },
-  { day: "Miércoles", type: "Bloque B: Empuje", time: "4AM/7PM", exercises: BLOCK_B, warmup: true, target: "Pecho Sup. (Anti-Ginecomastia)" },
-  { day: "Jueves", type: "Bloque A: Tren Inferior", time: "4AM/7PM", exercises: BLOCK_A, warmup: true, target: "Salud Pélvica y Glúteo" },
-  { day: "Viernes", type: "Bloque C + HIIT", time: "4AM/7PM", exercises: BLOCK_C, warmup: true, target: "Corrección Postural y GH", cardio: "HIIT: 8x (30s Sprint Max / 60s Marcha suave)" },
-  { day: "Sábado", type: "Resistencia 10k", time: "Mañana", desc: "Simulación 10k. FC: 125-145 ppm.", target: "Salud Cardiovascular" },
-  { day: "Domingo", type: "Movilidad Activa", time: "Mañana", desc: "Postura de Rana (3 min) + Estiramiento Psoas (2 min/lado)", target: "Control de Cortisol" },
+  { day: "Lunes", type: "Pierna & Core (A)", target: "Testosterona", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
+  { day: "Martes", type: "Cardio Zona 2", target: "Grasa Visceral", time: "4AM / 7PM", isRunning: true, zone: "105-123 ppm", duration: "45-60 min" },
+  { day: "Miércoles", type: "Empuje (B)", target: "Pectoral / Gineco", time: "4AM / 7PM", exercises: BLOCK_B, hasWarmup: true },
+  { day: "Jueves", type: "Pierna & Core (A)", target: "Salud Pélvica", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
+  { day: "Viernes", type: "Tracción (C) + HIIT", target: "Postura / GH", time: "4AM / 7PM", exercises: BLOCK_C, hasWarmup: true, hasHIIT: true },
+  { day: "Sábado", type: "Resistencia 10k", target: "Salud Cardíaca", time: "Mañana", isRunning: true, zone: "125-145 ppm", duration: "80-100 min" },
+  { day: "Domingo", type: "Movilidad Activa", target: "Cortisol", time: "Mañana", isMobility: true },
 ];
-
-// --- FUNCIONES DE CALENDARIO ---
-const dayMap = { "Lunes": "MO", "Martes": "TU", "Miércoles": "WE", "Jueves": "TH", "Viernes": "FR", "Sábado": "SA", "Domingo": "SU" };
-
-const handleGoogleCalendar = (e, day) => {
-  e.stopPropagation();
-  const baseUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE";
-  const text = `Entreno: ${day.type}`;
-  const details = `Plan Pedro Falcon\nObjetivo: ${day.target}`;
-  const recur = `RRULE:FREQ=WEEKLY;BYDAY=${dayMap[day.day]}`;
-  window.open(`${baseUrl}&text=${encodeURIComponent(text)}&details=${encodeURIComponent(details)}&recur=${recur}`, '_blank');
-};
-
-const downloadWeeklyICS = () => {
-  const events = SCHEDULE.map((day, idx) => {
-    const baseDate = `2024010${1 + idx}T110000Z`;
-    const endDate = `2024010${1 + idx}T123000Z`;
-    return `BEGIN:VEVENT\nSUMMARY:Entreno: ${day.type}\nDESCRIPTION:Objetivo: ${day.target}\nRRULE:FREQ=WEEKLY;BYDAY=${dayMap[day.day]}\nDTSTART:${baseDate}\nDTEND:${endDate}\nEND:VEVENT`;
-  }).join('\n');
-  const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Pedro Falcon App//ES\n${events}\nEND:VCALENDAR`;
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = window.URL.createObjectURL(blob);
-  link.download = `Calendario_Falcon.ics`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
 
 // --- COMPONENTES DE UI ---
 
-const TopNav = () => (
-  <div className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md pt-[max(1rem,env(safe-area-inset-top))]">
-    <div className="max-w-2xl mx-auto flex justify-between items-center">
-      <div>
-        <h1 className="text-xl font-bold text-emerald-400">Plan Optimización 44+</h1>
-        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Pedro Falcon • Home Gym</p>
-      </div>
-      <img src={`https://ui-avatars.com/api/?name=Pedro+Falcon&background=10b981&color=fff&rounded=true`} alt="Profile" className="w-9 h-9 border-2 border-slate-700 rounded-full" />
-    </div>
-  </div>
-);
-
-const NavButton = ({ id, icon, label, activeTab, setActiveTab, setSelectedDay }) => (
-  <button 
-    onClick={() => { setActiveTab(id); setSelectedDay(null); }}
-    className={`flex flex-col items-center justify-center flex-1 py-2 transition-all ${activeTab === id ? 'text-emerald-400' : 'text-slate-500'}`}
-  >
-    <div className={`p-1 rounded-lg ${activeTab === id ? 'bg-emerald-500/10' : ''}`}>
-      {icon}
-    </div>
-    <span className="text-[10px] mt-1 font-bold">{label}</span>
-  </button>
-);
-
-const BottomNav = ({ activeTab, setActiveTab, setSelectedDay }) => (
-  <div className="bg-slate-900 fixed bottom-0 w-full border-t border-slate-800 z-50 pb-[env(safe-area-inset-bottom)]">
-    <div className="max-w-2xl mx-auto flex justify-around items-center">
-      <NavButton id="home" icon={<Home size={22} />} label="INICIO" activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
-      <NavButton id="workout" icon={<Dumbbell size={22} />} label="ENTRENO" activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
-      <NavButton id="nutrition" icon={<Apple size={22} />} label="DIETA" activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
-      <NavButton id="metrics" icon={<Activity size={22} />} label="MÉTRICAS" activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
-      <NavButton id="info" icon={<BookOpen size={22} />} label="GUÍA" activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
-    </div>
-  </div>
+const SectionHeader = ({ children, icon: Icon, color = "text-emerald-500" }) => (
+  <h3 className={`text-xs font-black uppercase tracking-[0.3em] flex items-center mb-5 ${color}`}>
+    {Icon && <Icon size={18} className="mr-3" />}
+    {children}
+  </h3>
 );
 
 const ExerciseCard = ({ ex, index, startTimer }) => {
-  const [completedSets, setCompletedSets] = useState([]);
-  const toggleSet = (setIdx) => {
-    if (completedSets.includes(setIdx)) {
-      setCompletedSets(completedSets.filter(s => s !== setIdx));
-    } else {
-      setCompletedSets([...completedSets, setIdx]);
-      const restTime = parseInt(ex.rest.replace(/\D/g, '')) || 60;
-      if (startTimer) startTimer(restTime);
-    }
+  const [completed, setCompleted] = useState([]);
+  const toggle = (i) => {
+    if (completed.includes(i)) setCompleted(completed.filter(s => s !== i));
+    else { setCompleted([...completed, i]); if(startTimer) startTimer(parseInt(ex.rest)); }
   };
-  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.yt)}`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-4">
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="font-extrabold text-slate-900 text-base leading-tight pr-4">{index + 1}. {ex.name}</h4>
-          <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="text-red-600 bg-red-50 p-2 rounded-full active:bg-red-100 shrink-0">
-            <PlayCircle size={20} />
+    <div className="bg-white rounded-[35px] border border-slate-100 shadow-sm mb-6 overflow-hidden transition-all active:shadow-md">
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex-1 pr-4">
+             <h4 className="font-black text-slate-800 text-lg leading-tight uppercase tracking-tight">{index + 1}. {ex.name}</h4>
+          </div>
+          <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.yt)}`} target="_blank" rel="noopener noreferrer" className="bg-red-50 text-red-500 p-3 rounded-2xl active:scale-90 transition-transform shadow-sm">
+            <PlayCircle size={24} />
           </a>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center text-[10px] my-3 font-bold">
-          <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
-            <span className="text-slate-400 block mb-0.5">SERIES</span>
-            <span className="text-slate-800 text-sm">{ex.sets}</span>
-          </div>
-          <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
-            <span className="text-slate-400 block mb-0.5">REPS</span>
-            <span className="text-slate-800 text-sm">{ex.reps}</span>
-          </div>
-          <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
-            <span className="text-slate-400 block mb-0.5">TEMPO</span>
-            <span className="text-slate-800 text-[11px]">{ex.tempo}</span>
-          </div>
-          <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
-            <span className="text-slate-400 block mb-0.5">DESC.</span>
-            <span className="text-slate-800 text-sm">{ex.rest}</span>
-          </div>
+        
+        <div className="grid grid-cols-4 gap-2.5 mb-5 font-black text-slate-900">
+          {[ 
+            { l: 'Sets', v: ex.sets }, { l: 'Reps', v: ex.reps }, { l: 'Tempo', v: ex.tempo }, { l: 'Desc.', v: ex.rest+'s' }
+          ].map((item, i) => (
+            <div key={i} className="bg-slate-50 p-2.5 rounded-2xl text-center border border-slate-100/50 shadow-inner">
+              <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">{item.l}</p>
+              <p className="text-[12px] tracking-tighter">{item.v}</p>
+            </div>
+          ))}
         </div>
+
         {ex.notes && (
-          <div className="flex items-start bg-blue-50 text-blue-800 p-3 rounded-xl text-[11px] mb-3 border border-blue-100">
-            <Info size={14} className="shrink-0 mt-0.5 mr-2 text-blue-500" />
-            <p className="leading-tight">{ex.notes}</p>
+          <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-4 flex items-start mb-5 shadow-sm">
+            <Info size={16} className="text-emerald-600 mr-3 mt-0.5 shrink-0" />
+            <p className="text-[11px] font-bold text-emerald-800 leading-snug">{ex.notes}</p>
           </div>
         )}
-        <div className="border-t border-slate-50 pt-3">
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: ex.sets }).map((_, s) => (
-              <button
-                key={s}
-                onClick={() => toggleSet(s)}
-                className={`flex-1 min-w-[3.5rem] py-3 rounded-xl font-black text-sm transition-all border-2 ${
-                  completedSets.includes(s) 
-                    ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg scale-95' 
-                    : 'bg-white text-slate-300 border-slate-100 active:border-emerald-200'
-                }`}
-              >
-                {s + 1}
-              </button>
-            ))}
-          </div>
+
+        <div className="flex gap-2.5 pt-4 border-t border-slate-50">
+          {Array.from({ length: ex.sets }).map((_, s) => (
+            <button key={s} onClick={() => toggle(s)} className={`flex-1 py-4 rounded-2xl font-black text-sm transition-all border-2 ${completed.includes(s) ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg scale-95' : 'bg-white text-slate-300 border-slate-100 active:border-emerald-200'}`}>
+              {s + 1}
+            </button>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-// --- VISTAS ---
-
-const HomeView = ({ setActiveTab, setSelectedDay }) => (
-  <div className="p-4 space-y-6 animate-fade-in max-w-2xl mx-auto pb-24">
-    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex items-start space-x-3">
-      <ShieldAlert className="text-red-600 shrink-0 mt-1" />
-      <div>
-        <h3 className="font-black text-red-600 text-sm">RESTRICCIÓN MÉDICA</h3>
-        <p className="text-[12px] text-slate-700 mt-0.5 leading-snug">PROHIBIDO EL PESO MUERTO. Sentadillas permitidas con técnica respiratoria estricta.</p>
-      </div>
-    </div>
-
-    <div>
-      <div className="flex justify-between items-center mb-4 px-1">
-        <h2 className="text-lg font-black text-slate-800 flex items-center tracking-tight"><Clock className="mr-2 text-emerald-500" size={20}/> CALENDARIO</h2>
-        <button onClick={downloadWeeklyICS} className="text-[10px] bg-slate-900 text-white px-3 py-2 rounded-xl flex items-center font-bold uppercase tracking-wider">
-          <Watch size={14} className="mr-1.5"/> Exportar
-        </button>
-      </div>
-      <div className="grid gap-3">
-        {SCHEDULE.map((day, idx) => (
-          <div key={idx} onClick={() => { setActiveTab('workout'); setSelectedDay(idx); }} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 flex justify-between items-center active:scale-[0.98] transition-all border-l-4 border-l-emerald-500">
-            <div>
-              <p className="font-black text-slate-900 text-base">{day.day}</p>
-              <p className="text-sm text-emerald-600 font-bold">{day.type}</p>
-              <p className="text-[11px] text-slate-400 mt-0.5 font-medium">{day.target}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button onClick={(e) => handleGoogleCalendar(e, day)} className="p-2.5 text-slate-300 active:text-blue-500 active:bg-blue-50 rounded-full transition-colors"><CalendarPlus size={22}/></button>
-              <div className="w-px h-8 bg-slate-100"></div>
-              <PlayCircle className="text-slate-200" size={24}/>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
 const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
   if (selectedDay === null) {
     return (
-      <div className="p-4 max-w-2xl mx-auto pb-24">
-        <h2 className="text-2xl font-black text-slate-800 mb-5 tracking-tight px-1 uppercase">Entrenamiento</h2>
-        <div className="grid gap-3">
+      <div className="animate-fade-in space-y-6">
+        <SectionHeader icon={Dumbbell}>Escoger Rutina Diaria</SectionHeader>
+        <div className="grid gap-4">
           {SCHEDULE.map((day, idx) => (
-            <button key={idx} onClick={() => setSelectedDay(idx)} className="w-full text-left bg-white border border-slate-200 rounded-2xl p-5 active:bg-slate-50 shadow-sm border-l-4 border-l-slate-800">
-              <div className="flex justify-between items-center">
-                <span className="font-black text-lg text-slate-900">{day.day}</span>
-                <span className="text-[10px] font-black px-3 py-1 bg-slate-100 text-slate-600 rounded-full tracking-widest">{day.time}</span>
+            <button key={idx} onClick={() => setSelectedDay(idx)} className="w-full text-left bg-white border-2 border-slate-50 rounded-[35px] p-7 shadow-sm border-l-[12px] border-l-emerald-500 flex justify-between items-center active:scale-[0.98] transition-all group">
+              <div>
+                <span className="font-black text-xl text-slate-900 tracking-tighter uppercase group-active:text-emerald-600">{day.day}</span>
+                <p className="text-emerald-600 font-black text-[11px] uppercase tracking-widest mt-1.5">{day.type}</p>
               </div>
-              <p className="text-emerald-600 font-bold mt-1 text-sm">{day.type}</p>
+              <div className="bg-slate-100 px-4 py-2 rounded-2xl">
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">{day.time}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -263,217 +140,361 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
 
   const dayData = SCHEDULE[selectedDay];
   return (
-    <div className="p-4 max-w-2xl mx-auto pb-24 animate-fade-in">
-      <button onClick={() => setSelectedDay(null)} className="text-emerald-600 text-xs font-black mb-5 flex items-center uppercase tracking-widest bg-emerald-50 px-4 py-2 rounded-full">← Volver al menú</button>
-      <div className="bg-slate-900 text-white rounded-3xl p-6 mb-6 shadow-xl border-b-8 border-emerald-500">
-        <h2 className="text-3xl font-black text-emerald-400 leading-tight uppercase tracking-tighter">{dayData.day}</h2>
-        <p className="text-lg font-bold mt-0.5 text-slate-200">{dayData.type}</p>
-        <div className="flex gap-4 mt-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
-          <span className="flex items-center"><Clock size={14} className="mr-1.5 text-emerald-500"/> {dayData.time}</span>
-          <span className="flex items-center"><Activity size={14} className="mr-1.5 text-emerald-500"/> {dayData.target}</span>
-        </div>
+    <div className="animate-fade-in space-y-8 pb-10">
+      <button onClick={() => setSelectedDay(null)} className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-6 py-3 rounded-[20px] uppercase tracking-widest shadow-sm active:scale-90 transition-all border border-emerald-100">← Volver al Menú</button>
+      
+      <div className="bg-slate-900 text-white rounded-[55px] p-10 shadow-2xl border-b-[14px] border-emerald-500 relative overflow-hidden border border-slate-800">
+         <div className="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mb-24 blur-3xl"></div>
+         <h2 className="text-6xl font-black text-emerald-400 uppercase tracking-tighter leading-none italic">{dayData.day}</h2>
+         <p className="text-2xl font-bold text-slate-200 mt-3 tracking-tight">{dayData.type}</p>
+         <div className="flex gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.3em] text-slate-500">
+           <span className="flex items-center bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700 shadow-inner"><Activity size={16} className="mr-3 text-emerald-500"/> {dayData.target}</span>
+         </div>
       </div>
 
-      {dayData.warmup && (
-        <div className="mb-8">
-          <h3 className="text-sm font-black text-slate-400 mb-3 ml-1 uppercase tracking-widest">Calentamiento</h3>
-          <div className="bg-orange-50 rounded-2xl p-4 border border-orange-100 space-y-4 shadow-sm">
-            {WARMUP_ROUTINE.map((w, i) => (
-              <div key={i} className="flex items-start">
-                <div className="w-6 h-6 rounded-lg bg-orange-200 text-orange-800 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 shadow-sm">{i+1}</div>
-                <div className="ml-3">
-                  <p className="font-black text-slate-900 text-sm leading-none">{w.name} <span className="text-orange-600 font-bold ml-1">[{w.duration}]</span></p>
-                  <p className="text-[11px] text-slate-500 mt-1 font-medium leading-tight">{w.desc}</p>
-                </div>
+      {dayData.isRunning && (
+        <div className="space-y-8">
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-8 rounded-[45px] shadow-2xl shadow-emerald-500/20 border-b-8 border-emerald-900">
+            <SectionHeader color="text-emerald-100" icon={Activity}>Estrategia de Running</SectionHeader>
+            <div className="grid grid-cols-2 gap-5 mt-4">
+              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-2xl font-black">{dayData.duration}</p></div>
+              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-2xl font-black">{dayData.zone}</p></div>
+            </div>
+          </div>
+          
+          <SectionHeader icon={Zap}>Fase 1: Preparación (10 min)</SectionHeader>
+          <div className="space-y-4">
+            {RUNNING_WARMUP.map((p, i) => (
+              <div key={i} className="bg-white p-6 rounded-[35px] border border-slate-100 shadow-sm flex items-center">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center font-black mr-5 shadow-inner border border-orange-100">{i+1}</div>
+                <div><p className="font-black text-sm text-slate-900 uppercase tracking-tight">{p.name} <span className="text-orange-500">[{p.duration}]</span></p><p className="text-[11px] text-slate-500 font-bold mt-1 leading-snug">{p.desc}</p></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-slate-900 text-white p-10 rounded-[50px] border-l-[18px] border-emerald-500 shadow-2xl border border-slate-800">
+             <SectionHeader color="text-emerald-400" icon={Zap}>Fase 2: Bloque Central</SectionHeader>
+             <p className="text-2xl font-black leading-tight italic tracking-tight uppercase">Carrera continua a {dayData.zone}.</p>
+             <div className="mt-5 p-5 bg-slate-800/50 rounded-3xl border border-slate-700">
+                <p className="text-[11px] text-slate-400 font-bold italic text-center">Utiliza respiración nasal controlada para maximizar la quema de grasas y oxigenación celular.</p>
+             </div>
+          </div>
+
+          <SectionHeader icon={Wind}>Fase 3: Recuperación (10 min)</SectionHeader>
+          <div className="space-y-4">
+            {RUNNING_COOLDOWN.map((p, i) => (
+              <div key={i} className="bg-white p-6 rounded-[35px] border border-slate-100 shadow-sm flex items-center opacity-85">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center font-black mr-5 shadow-inner border border-blue-100">√</div>
+                <div><p className="font-black text-sm text-slate-900 uppercase tracking-tight">{p.name} <span className="text-blue-500">[{p.duration}]</span></p><p className="text-[11px] text-slate-500 font-bold mt-1 leading-snug">{p.desc}</p></div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-1">
-        {dayData.exercises && dayData.exercises.map((ex, i) => (
-          <ExerciseCard key={i} ex={ex} index={i} startTimer={startTimer} />
-        ))}
-      </div>
-
-      {dayData.cardio && (
-        <div className="mt-8 bg-red-50 rounded-2xl p-5 border border-red-100 shadow-sm">
-          <h3 className="text-base font-black text-red-800 mb-2 flex items-center uppercase tracking-tight"><Flame className="mr-2" size={20}/> HIIT / Quema Grasa</h3>
-          <p className="text-sm text-slate-800 font-bold leading-relaxed">{dayData.cardio}</p>
+      {dayData.exercises && (
+        <div className="space-y-8">
+          <SectionHeader icon={Zap}>Calentamiento de Fuerza</SectionHeader>
+          <div className="bg-orange-50 rounded-[40px] border border-orange-100 p-8 space-y-5 shadow-inner">
+            {WARMUP_WEIGHTS.map((w, i) => (
+              <div key={i} className="flex items-start">
+                <div className="w-8 h-8 rounded-xl bg-orange-200 text-orange-900 flex items-center justify-center text-[11px] font-black shrink-0 mt-0.5 shadow-sm border border-orange-300">{i+1}</div>
+                <div className="ml-5"><p className="text-[13px] font-black text-slate-900 uppercase tracking-tight">{w.name} <span className="text-orange-600 font-bold ml-1">[{w.duration}]</span></p><p className="text-[11px] text-slate-600 font-bold mt-1 leading-snug">{w.desc}</p></div>
+              </div>
+            ))}
+          </div>
+          <SectionHeader icon={Dumbbell}>Rutina de Pesas</SectionHeader>
+          {dayData.exercises.map((ex, i) => <ExerciseCard key={i} ex={ex} index={i} startTimer={startTimer} />)}
         </div>
       )}
 
-      {dayData.desc && !dayData.exercises && (
-        <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center">
-          <div className="bg-emerald-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Activity className="text-emerald-500" size={40} />
+      {dayData.hasHIIT && (
+        <div className="bg-red-600 text-white rounded-[50px] p-10 shadow-2xl shadow-red-500/20 mt-12 border-b-[12px] border-red-900 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10"><Flame size={120} /></div>
+          <SectionHeader color="text-white" icon={Flame}>Reset Metabólico: HIIT</SectionHeader>
+          <div className="space-y-5 relative z-10 font-black">
+             <div className="bg-white/10 p-6 rounded-[32px] border border-white/20 backdrop-blur-sm shadow-inner text-center">
+                <p className="text-xl leading-tight italic uppercase tracking-tighter">"8 Rondas de Intensidad Máxima"</p>
+                <p className="text-[10px] text-red-200 mt-2 tracking-[0.2em] uppercase">Objetivo: Frecuencia Cardíaca {">"} 155 PPM</p>
+             </div>
+             <div className="grid gap-4">
+               <div className="flex items-center space-x-5 bg-red-700/50 p-5 rounded-[28px] border border-red-400/20 shadow-sm transition-transform active:scale-95"><ArrowRight size={24} className="text-red-300"/><p className="text-xs uppercase tracking-tight">30 seg: Sprints (High Knees) o Shadow Boxing explosivo.</p></div>
+               <div className="flex items-center space-x-5 bg-slate-900/40 p-5 rounded-[28px] border border-slate-700/50 shadow-sm transition-transform active:scale-95"><ArrowRight size={24} className="text-slate-300"/><p className="text-xs uppercase tracking-tight">60 seg: Marcha suave activa para recuperación parcial.</p></div>
+             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 mb-3 uppercase tracking-tighter">{dayData.type}</h3>
-          <p className="text-slate-500 text-sm leading-relaxed font-medium">{dayData.desc}</p>
+        </div>
+      )}
+
+      {dayData.isMobility && (
+        <div className="space-y-8 pb-10">
+          <SectionHeader icon={BookOpen}>Recuperación Parasimpática</SectionHeader>
+          {[ 
+            { n: 'Postura de la Rana', d: '3 min', yt: 'Frog pose mobility yoga hip stretch', desc: 'Apertura profunda de cadera y flujo pélvico.' },
+            { n: 'Estiramiento de Psoas', d: '2 min/lado', yt: 'Psoas stretch hip flexor mobility', desc: 'Alivia la tensión lumbar acumulada en la semana.' }
+          ].map((m, i) => (
+            <div key={i} className="bg-white p-7 rounded-[40px] border border-slate-100 shadow-sm flex justify-between items-center active:scale-[0.98] transition-transform">
+              <div className="pr-4">
+                 <p className="font-black text-slate-900 text-xl tracking-tighter leading-none uppercase italic">{m.n}</p>
+                 <p className="text-[11px] text-emerald-600 font-black uppercase tracking-widest mt-3">{m.d} • {m.desc}</p>
+              </div>
+              <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(m.yt)}`} target="_blank" rel="noopener noreferrer" className="bg-emerald-50 text-emerald-600 p-4 rounded-3xl shadow-inner active:bg-emerald-100 transition-colors shadow-emerald-500/20 border border-emerald-100">
+                <PlayCircle size={28} />
+              </a>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-const NutritionView = () => (
-  <div className="p-4 space-y-6 animate-fade-in max-w-2xl mx-auto pb-24">
-    <div className="text-center bg-slate-900 text-white rounded-3xl p-8 shadow-2xl border-b-8 border-emerald-500">
-      <h2 className="text-5xl font-black text-emerald-400 tracking-tighter">151<span className="text-2xl ml-1 uppercase">g</span></h2>
-      <p className="text-xs text-slate-400 mt-2 uppercase tracking-[0.2em] font-black">Meta Proteína Diaria</p>
-    </div>
-    <div className="grid gap-4">
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-start shadow-sm">
-        <div className="bg-orange-50 text-orange-600 p-3 rounded-2xl mr-4"><Apple size={24}/></div>
-        <div>
-          <h3 className="font-black text-slate-900 text-base uppercase tracking-tight">Sólidos (~100g)</h3>
-          <p className="text-slate-500 text-xs mt-1 leading-relaxed font-medium">3 huevos (desayuno) + 200g carne/pollo (comidas). Focalizado en alimentos reales.</p>
-        </div>
-      </div>
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-start shadow-sm">
-        <div className="bg-blue-50 text-blue-600 p-3 rounded-2xl mr-4"><Activity size={24}/></div>
-        <div>
-          <h3 className="font-black text-slate-900 text-base uppercase tracking-tight">Isolate (~50g)</h3>
-          <p className="text-slate-500 text-xs mt-1 leading-relaxed font-medium italic">2 scoops con AGUA solamente. Evita lactosa y estrógenos.</p>
-          <div className="flex gap-2 mt-3">
-            <span className="bg-slate-100 px-2 py-1 rounded-lg text-[9px] font-black text-slate-500 uppercase">Post-entreno</span>
-            <span className="bg-slate-100 px-2 py-1 rounded-lg text-[9px] font-black text-slate-500 uppercase">4:00 PM</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-lg">
-      <h3 className="font-black text-emerald-400 mb-4 flex items-center text-sm uppercase tracking-widest"><Zap className="mr-2 text-emerald-400" size={18}/> Stack Hormonal</h3>
-      <div className="grid grid-cols-2 gap-3 text-[10px] font-black uppercase tracking-widest">
-        <div className="bg-slate-800 p-3 rounded-2xl border border-slate-700">Zinc: 30-50mg</div>
-        <div className="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-emerald-400">Citrulina: 6g</div>
-        <div className="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-indigo-400">Magnesio: 400mg</div>
-        <div className="bg-slate-800 p-3 rounded-2xl border border-slate-700">D3+K2: 5000 UI</div>
-      </div>
-    </div>
-  </div>
-);
-
-const MetricsView = () => {
-  const [bodyLogs, setBodyLogs] = useState(() => JSON.parse(localStorage.getItem('f_body')) || []);
-  const [bForm, setBForm] = useState({ date: new Date().toISOString().split('T')[0], weight: '', waist: '', chest: '' });
-
-  useEffect(() => localStorage.setItem('f_body', JSON.stringify(bodyLogs)), [bodyLogs]);
-
-  const addBody = () => {
-    if(!bForm.weight && !bForm.waist) return;
-    setBodyLogs([{ id: Date.now(), ...bForm }, ...bodyLogs]);
-    setBForm({...bForm, weight: '', waist: '', chest: ''});
-  };
-
-  return (
-    <div className="p-4 space-y-6 animate-fade-in max-w-2xl mx-auto pb-24">
-      <div className="bg-white rounded-3xl shadow-sm border p-6">
-        <h3 className="font-black text-slate-900 mb-4 border-b pb-2 flex items-center text-base uppercase tracking-tight"><LineChart className="mr-2 text-emerald-500"/> Registro Corporal</h3>
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="space-y-1">
-            <label className="text-[9px] font-black text-slate-400 ml-1 uppercase">Peso (kg)</label>
-            <input type="number" value={bForm.weight} onChange={e => setBForm({...bForm, weight: e.target.value})} className="w-full p-3 border-2 border-slate-100 rounded-xl text-sm font-bold bg-slate-50 focus:border-emerald-500 outline-none transition-all" />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[9px] font-black text-slate-400 ml-1 uppercase">Cintura (cm)</label>
-            <input type="number" value={bForm.waist} onChange={e => setBForm({...bForm, waist: e.target.value})} className="w-full p-3 border-2 border-slate-100 rounded-xl text-sm font-bold bg-slate-50 focus:border-emerald-500 outline-none transition-all" />
-          </div>
-          <button onClick={addBody} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-sm active:scale-95 shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
-            Guardar Medición
-          </button>
-        </div>
-        <div className="overflow-hidden rounded-2xl border border-slate-100 mt-6">
-          <table className="w-full text-[10px] text-left">
-            <thead className="bg-slate-50 text-slate-400 font-black uppercase tracking-widest border-b border-slate-100">
-              <tr><th className="p-3">Fecha</th><th className="p-3">Kg</th><th className="p-3">Cm</th></tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {bodyLogs.map(l => <tr key={l.id} className="text-slate-700 font-bold"><td className="p-3">{l.date}</td><td className="p-3 text-emerald-600">{l.weight}</td><td className="p-3">{l.waist}</td></tr>)}
-            </tbody>
-          </table>
-          {bodyLogs.length === 0 && <p className="text-center p-6 text-[11px] text-slate-400 italic">No hay registros almacenados.</p>}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const InfoView = () => (
-  <div className="p-4 space-y-5 animate-fade-in max-w-2xl mx-auto pb-24 text-sm">
-    <div className="bg-emerald-600 text-white p-6 rounded-3xl shadow-xl shadow-emerald-500/20">
-      <h3 className="font-black flex items-center mb-3 text-base uppercase tracking-tight"><ShieldAlert className="mr-2" size={22}/> Técnica Diástasis</h3>
-      <p className="text-[12px] leading-relaxed font-bold italic opacity-90 border-l-2 border-white/30 pl-3">"Exhala fuerte y mete el ombligo al subir la sentadilla. Piensa en abrochar un cinturón apretado. Prohibido aguantar el aire."</p>
-    </div>
-    <div className="bg-white p-5 rounded-2xl border-l-8 border-indigo-500 shadow-sm">
-      <h4 className="font-black text-indigo-900 text-sm uppercase tracking-tight mb-1">Hormonas & Sueño</h4>
-      <p className="text-[11px] text-slate-500 leading-tight font-medium">Sin oxigenación nocturna (CPAP) no hay reparación muscular ni testosterona. Tu IAH debe estar bajo 5.0.</p>
-    </div>
-    <div className="bg-white p-5 rounded-2xl border-l-8 border-orange-500 shadow-sm">
-      <h4 className="font-black text-orange-900 text-sm uppercase tracking-tight mb-1">Doble Progresión</h4>
-      <p className="text-[11px] text-slate-500 leading-tight font-medium">Anota tus pesos. Sube la carga solo cuando controles el tempo 3-1-2-1 perfectamente sin abultar el abdomen.</p>
-    </div>
-  </div>
-);
-
-// --- APP PRINCIPAL ---
+// --- APP COMPONENT ---
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [tab, setTab] = useState('home');
   const [selectedDay, setSelectedDay] = useState(null);
-  const [timerSeconds, setTimerSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+
+  // Persistencia de Logs
+  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_1')) || []);
+  const [form, setForm] = useState({ weight: '', waist: '', iah: '', erec: 'Sí' });
+
+  useEffect(() => localStorage.setItem('f_logs_v_final_1', JSON.stringify(logs)), [logs]);
 
   useEffect(() => {
-    let interval = null;
-    if (isTimerRunning && timerSeconds > 0) {
-      interval = setInterval(() => setTimerSeconds(prev => prev - 1), 1000);
-    } else if (timerSeconds === 0 && isTimerRunning) {
-      setIsTimerRunning(false);
-      if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+    let int = null;
+    if (isRunning && timer > 0) int = setInterval(() => setTimer(t => t - 1), 1000);
+    else if (timer === 0 && isRunning) {
+      setIsRunning(false);
+      if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
     }
-    return () => clearInterval(interval);
-  }, [isTimerRunning, timerSeconds]);
+    return () => clearInterval(int);
+  }, [isRunning, timer]);
 
-  const startTimer = (seconds) => {
-    setTimerSeconds(seconds);
-    setIsTimerRunning(true);
+  const startTimer = (s) => { setTimer(s); setIsRunning(true); };
+
+  const saveMetrics = () => {
+    if(!form.weight && !form.iah) return;
+    setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form }, ...logs]);
+    setForm({ weight: '', waist: '', iah: '', erec: 'Sí' });
+  };
+
+  const handleCalendar = (day) => {
+    const dayMap = { "Lunes": "MO", "Martes": "TU", "Miércoles": "WE", "Jueves": "TH", "Viernes": "FR", "Sábado": "SA", "Domingo": "SU" };
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Entreno Falcon: ' + day.type)}&recur=RRULE:FREQ=WEEKLY;BYDAY=${dayMap[day.day]}`;
+    window.open(url, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden antialiased">
-      <TopNav />
-      <main className="transition-all duration-300">
-        {activeTab === 'home' && <HomeView setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />}
-        {activeTab === 'workout' && <WorkoutView selectedDay={selectedDay} setSelectedDay={setSelectedDay} startTimer={startTimer} />}
-        {activeTab === 'nutrition' && <NutritionView />}
-        {activeTab === 'metrics' && <MetricsView />}
-        {activeTab === 'info' && <InfoView />}
+    <div className="min-h-screen bg-[#fcfdfe] text-slate-900 pb-40 font-sans antialiased overflow-x-hidden">
+      
+      {/* HEADER PREMIUM */}
+      <header className="bg-slate-900 text-white p-6 sticky top-0 z-50 shadow-2xl pt-[max(1.5rem,env(safe-area-inset-top))] border-b border-emerald-500/20 backdrop-blur-xl bg-opacity-95">
+        <div className="max-w-md mx-auto flex justify-between items-center">
+          <div onClick={() => {setTab('home'); setSelectedDay(null);}} className="cursor-pointer active:opacity-70 transition-opacity">
+            <h1 className="text-2xl font-black text-white leading-none tracking-tighter uppercase italic">
+              Falcon<span className="text-emerald-400">44+</span>
+            </h1>
+            <p className="text-[9px] text-emerald-500/80 uppercase font-black tracking-[0.4em] mt-2 ml-0.5 opacity-80 leading-none">Bio-Hormonal Mastery</p>
+          </div>
+          <div className="w-12 h-12 rounded-[20px] bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-black text-white text-lg shadow-2xl shadow-emerald-500/30 border border-white/20">PF</div>
+        </div>
+      </header>
+
+      <main className="max-w-md mx-auto p-5">
+        
+        {/* TAB: INICIO */}
+        {tab === 'home' && selectedDay === null && (
+          <div className="space-y-8 animate-fade-in">
+            <div className="bg-slate-900 rounded-[45px] p-7 text-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden border border-slate-800 ring-1 ring-white/5 transition-transform active:scale-[0.98]">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/10 rounded-full -mr-20 -mt-20 blur-3xl animate-pulse"></div>
+              <div className="relative z-10 flex items-start space-x-5">
+                <div className="bg-red-600 p-4 rounded-[22px] shadow-2xl shadow-red-600/40 border border-red-500/50">
+                  <ShieldAlert size={32} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mb-2">Protocolo Clínico</p>
+                  <p className="text-[15px] font-black leading-snug text-slate-100 uppercase tracking-tight italic">Peso muerto prohibido.<br/><span className="text-slate-400 font-bold lowercase text-[12px] opacity-90 tracking-normal">Cierra tu diástasis con exhalación biomecánica.</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <SectionHeader icon={Clock}>Calendario de Optimización</SectionHeader>
+              <div className="grid gap-5">
+                {SCHEDULE.map((d, i) => (
+                  <div key={i} onClick={() => { setTab('workout'); setSelectedDay(i); }} className="bg-white p-7 rounded-[40px] border border-slate-100 shadow-sm flex justify-between items-center border-l-[14px] border-l-emerald-500 active:scale-[0.96] transition-all hover:shadow-md">
+                    <div>
+                      <p className="font-black text-slate-900 text-2xl leading-none tracking-tighter uppercase">{d.day}</p>
+                      <p className="text-[11px] text-emerald-600 font-black mt-2.5 uppercase tracking-widest leading-none">{d.type}</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                       <button onClick={(e) => {e.stopPropagation(); handleCalendar(d);}} className="p-3.5 text-slate-300 active:text-emerald-500 bg-slate-50 rounded-2xl transition-all shadow-inner"><CalendarPlus size={24}/></button>
+                       <ChevronRight size={22} className="text-slate-200" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: ENTRENO */}
+        {tab === 'workout' && (
+          <WorkoutView selectedDay={selectedDay} setSelectedDay={setSelectedDay} startTimer={startTimer} />
+        )}
+
+        {/* TAB: DIETA */}
+        {tab === 'diet' && (
+          <div className="space-y-8 animate-fade-in text-slate-900">
+             <div className="bg-slate-900 text-white rounded-[55px] p-12 text-center shadow-[0_30px_60px_-12px_rgba(0,0,0,0.6)] border-b-[15px] border-emerald-500 relative overflow-hidden border border-slate-800">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 rounded-full -mr-24 -mt-24 blur-[100px]"></div>
+               <h2 className="text-8xl font-black text-emerald-400 tracking-tighter leading-none italic drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]">151<span className="text-3xl ml-2 uppercase tracking-normal text-white">g</span></h2>
+               <p className="text-[12px] font-black uppercase tracking-[0.5em] text-slate-500 mt-8 ml-2 opacity-80 leading-none">Proteína Diaria Meta</p>
+            </div>
+            
+            <SectionHeader icon={Apple}>Plan de Nutrición</SectionHeader>
+            <div className="bg-white p-8 rounded-[45px] border border-slate-100 shadow-sm flex items-center group transition-all active:bg-slate-50">
+               <div className="bg-orange-50 p-5 rounded-[30px] mr-7 shrink-0 shadow-inner border border-orange-100"><Apple className="text-orange-500" size={40}/></div>
+               <div><h3 className="font-black text-slate-900 uppercase text-base tracking-tight leading-none">Sólidos (~100g)</h3><p className="text-[13px] text-slate-400 font-bold leading-tight mt-2 italic text-slate-500">3 huevos enteros (desayuno) + 200g proteína magra en las comidas principales. Prioriza brócoli y coliflor.</p></div>
+            </div>
+
+            <div className="bg-slate-900 p-10 rounded-[55px] text-white shadow-2xl border border-slate-800">
+               <SectionHeader color="text-emerald-400" icon={Zap}>Stack de Suplementación</SectionHeader>
+               <div className="grid grid-cols-2 gap-6 mt-8">
+                 {[ 
+                   { n: 'Zinc', v: '50mg', l: 'Anti-Aromatasa' },
+                   { n: 'Citrulina', v: '6g', l: 'Vasodilatación' },
+                   { n: 'Magnesio', v: '400mg', l: 'Recuperación' },
+                   { n: 'D3+K2', v: '5000 UI', l: 'Hormona Base' }
+                 ].map((s, i) => (
+                   <div key={i} className="bg-slate-800/40 p-6 rounded-[35px] border border-slate-700 shadow-inner active:bg-emerald-500/10 transition-colors">
+                     <p className="text-[9px] text-slate-500 uppercase font-black mb-2 tracking-widest leading-none">{s.l}</p>
+                     <p className="text-lg font-black text-white leading-none">{s.n}</p>
+                     <p className="text-[12px] font-bold text-emerald-400 mt-2.5 leading-none">{s.v}</p>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: MÉTRICAS */}
+        {tab === 'stats' && (
+          <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
+            <div className="bg-white rounded-[50px] border border-slate-100 p-10 shadow-sm">
+              <SectionHeader icon={LineChart}>Monitoreo Biométrico</SectionHeader>
+              <div className="grid grid-cols-2 gap-6 mb-10">
+                <div className="space-y-2 col-span-1">
+                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Peso (kg)</label>
+                  <input type="number" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                </div>
+                <div className="space-y-2 col-span-1">
+                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Cintura (cm)</label>
+                  <input type="number" value={form.waist} onChange={e=>setForm({...form, waist:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                </div>
+                <div className="space-y-2 col-span-1">
+                  <label className="text-[11px] font-black text-indigo-500 uppercase ml-4 tracking-[0.3em]">IAH (CPAP)</label>
+                  <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-2xl font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                </div>
+                <div className="space-y-2 col-span-1">
+                  <label className="text-[11px] font-black text-slate-400 uppercase ml-4 tracking-[0.3em]">Erección</label>
+                  <select value={form.erec} onChange={e=>setForm({...form, erec:e.target.value})} className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[30px] text-sm font-black outline-none appearance-none text-center shadow-inner bg-no-repeat">
+                    <option>Sí</option><option>No</option>
+                  </select>
+                </div>
+                <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-7 rounded-[30px] font-black text-sm active:scale-95 shadow-[0_20px_40px_rgba(16,185,129,0.3)] uppercase tracking-[0.4em] mt-6 transition-all border-b-8 border-emerald-800">
+                  Registrar Avance
+                </button>
+              </div>
+
+              {logs.length > 0 && (
+                <div className="mt-12 overflow-hidden rounded-[40px] border border-slate-100 shadow-2xl bg-white">
+                  <table className="w-full text-left text-[12px]">
+                    <thead className="bg-slate-900 text-white font-black uppercase tracking-[0.15em]"><tr className="border-b border-slate-800">
+                      <th className="p-5 text-center">Fecha</th><th className="p-5 text-center">Kg</th><th className="p-5 text-center">IAH</th><th className="p-5 text-center">Erec.</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {logs.map(l => <tr key={l.id} className="font-black text-slate-700 active:bg-slate-50 transition-colors">
+                        <td className="p-5 text-center text-slate-400 font-bold tracking-tighter">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
+                        <td className="p-5 text-center text-emerald-600 font-black italic tracking-tighter">{l.weight}k</td>
+                        <td className="p-5 text-center text-indigo-600 tracking-tighter">{l.iah || '-'}</td>
+                        <td className="p-5 text-center uppercase text-[10px] tracking-widest">{l.erec}</td>
+                      </tr>)}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: GUÍA */}
+        {tab === 'guide' && (
+          <div className="space-y-8 animate-fade-in pb-12">
+            <div className="bg-emerald-600 text-white p-12 rounded-[60px] shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4)] border-b-[15px] border-emerald-800 relative overflow-hidden transition-transform active:scale-[0.98]">
+               <div className="absolute top-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mt-24 blur-3xl opacity-60"></div>
+              <SectionHeader color="text-emerald-100" icon={ShieldAlert}>Respiración Biomecánica</SectionHeader>
+              <p className="text-lg font-black leading-tight italic border-l-4 border-white/30 pl-7 tracking-tight uppercase">"Sopla el aire con fuerza absoluta y contrae el ombligo mientras vences la carga."</p>
+              <p className="text-[12px] font-bold text-emerald-100 mt-5 opacity-90 leading-snug">Esto activa el transverso abdominal, creando una faja de seguridad biológica para tu diástasis en cada esfuerzo.</p>
+            </div>
+            
+            <div className="bg-white p-10 rounded-[45px] border-l-[20px] border-indigo-500 shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-100">
+              <h4 className="font-black text-indigo-900 text-lg uppercase mb-3 tracking-tighter">Oxigenación CPAP</h4>
+              <p className="text-sm text-slate-500 font-black leading-snug tracking-tight">"Sin oxigenación nocturna, el entreno no servirá para ganar músculo, solo te fatigará más. Mantén tu IAH bajo 5.0 siempre."</p>
+            </div>
+
+            <div className="bg-white p-10 rounded-[45px] border-l-[20px] border-orange-500 shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-100">
+              <h4 className="font-black text-orange-900 text-lg uppercase mb-3 tracking-tighter">Doble Progresión</h4>
+              <p className="text-sm text-slate-500 font-black leading-snug tracking-tight uppercase">Prioriza el TEMPO 3-1-2-1.<br/><span className="text-slate-400 font-bold lowercase text-[12px]">Sube peso solo si mantienes el control abdominal perfecto en cada repetición.</span></p>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* Temporizador Flotante */}
-      {(timerSeconds > 0 || isTimerRunning) && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center space-x-4 z-[100] border border-slate-700 animate-fade-in backdrop-blur-md bg-opacity-90">
-          <Timer size={20} className={timerSeconds === 0 ? "text-red-500 animate-pulse" : "text-emerald-400"} />
-          <span className="font-mono font-black text-xl w-14 text-center">
-            {Math.floor(timerSeconds/60)}:{(timerSeconds%60).toString().padStart(2, '0')}
-          </span>
-          <button onClick={() => setIsTimerRunning(!isTimerRunning)} className="bg-slate-800 p-2 rounded-xl active:bg-slate-700">
-            {isTimerRunning ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-          </button>
-          <button onClick={() => { setTimerSeconds(0); setIsTimerRunning(false); }} className="text-red-400 font-bold p-1">
-            <X size={22} />
-          </button>
+      {/* TIMER PREMIUM FLOTANTE */}
+      {(timer > 0 || isRunning) && (
+        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-12 py-8 rounded-[80px] shadow-[0_50px_100px_rgba(0,0,0,0.6)] flex items-center space-x-12 z-[100] border-2 border-emerald-500/30 animate-fade-in backdrop-blur-3xl bg-opacity-95 ring-8 ring-slate-900/40">
+          <div className="relative">
+            <Timer size={44} className={timer === 0 ? "text-red-500 animate-pulse" : "text-emerald-400"} />
+            {isRunning && <div className="absolute inset-0 bg-emerald-400 rounded-full blur-3xl opacity-40 animate-pulse"></div>}
+          </div>
+          <span className="font-mono font-black text-7xl w-44 text-center tracking-tighter tabular-nums text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)] italic">{Math.floor(timer/60)}:{(timer%60).toString().padStart(2, '0')}</span>
+          <div className="flex space-x-6">
+            <button onClick={() => setIsRunning(!isRunning)} className="bg-slate-800 p-6 rounded-[35px] active:scale-90 transition-transform border border-slate-700 shadow-2xl">
+              {isRunning ? <Pause size={40} fill="white" /> : <Play size={40} fill="white" />}
+            </button>
+            <button onClick={() => {setTimer(0); setIsRunning(false)}} className="text-red-400 font-black text-6xl leading-none hover:text-red-500 active:scale-75 transition-all">×</button>
+          </div>
         </div>
       )}
 
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} setSelectedDay={setSelectedDay} />
+      {/* NAVEGACIÓN INFERIOR PREMIUM */}
+      <nav className="bg-slate-900 fixed bottom-0 w-full border-t border-slate-800 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-25px_60px_rgba(0,0,0,0.6)] backdrop-blur-md bg-opacity-98">
+        <div className="max-w-md mx-auto flex justify-around items-center px-6">
+          {[
+            { id: 'home', icon: Home, label: 'Inicio' },
+            { id: 'workout', icon: Dumbbell, label: 'Entreno' },
+            { id: 'diet', icon: Apple, label: 'Dieta' },
+            { id: 'stats', icon: Activity, label: 'Logs' },
+            { id: 'guide', icon: BookOpen, label: 'Guía' }
+          ].map((item) => (
+            <button key={item.id} onClick={() => {setTab(item.id); setSelectedDay(null);}} className={`flex flex-col items-center justify-center flex-1 py-8 transition-all duration-700 ${tab === item.id ? 'text-emerald-400 -translate-y-3 scale-110' : 'text-slate-600 opacity-60 hover:opacity-100'}`}>
+              <item.icon size={28} className={tab === item.id ? "drop-shadow-[0_0_12px_rgba(52,211,153,0.6)]" : ""} />
+              <span className="text-[10px] mt-2.5 font-black tracking-[0.25em] uppercase">{item.label}</span>
+              {tab === item.id && <div className="w-2 h-2 bg-emerald-400 rounded-full mt-2 shadow-[0_0_10px_rgba(52,211,153,1)]"></div>}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        body { -webkit-tap-highlight-color: transparent; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        body { -webkit-tap-highlight-color: transparent; background-color: #fcfdfe; }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        ::-webkit-scrollbar { display: none; }
       `}} />
     </div>
   );
