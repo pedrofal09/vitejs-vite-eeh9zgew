@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home, Dumbbell, Apple, Activity, BookOpen, PlayCircle, Clock, Info,
   ShieldAlert, Zap, Flame, Plus, Trash2, LineChart, Timer, X,
   Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight, ActivitySquare,
-  Camera, Image as ImageIcon
+  Camera, Image as ImageIcon, Bot, Send, Loader2
 } from 'lucide-react';
 
 // --- DATA MASTER: ESTRUCTURA DEL PLAN ---
@@ -268,51 +268,203 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
   );
 };
 
-// --- APP COMPONENT ---
+// --- COACH IA COMPONENT ---
+// FIX #8: Lee la apiKey desde localStorage en lugar de string vacío hardcodeado
+const CoachIA = () => {
+  const [messages, setMessages] = useState([
+    { role: 'model', text: '¡Hola Pedro! Soy tu Coach de Bio-Hacking. Conozco perfectamente tu plan: priorizamos la testosterona, cero peso muerto por la diástasis, y controlamos tu IAH con el CPAP. ¿En qué te puedo ayudar hoy?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const endOfMessagesRef = useRef(null);
+
+  const scrollToBottom = () => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    const userMessage = input;
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      // FIX #8: Leer apiKey desde localStorage en lugar de string vacío
+      const apiKey = (() => {
+        try {
+          const saved = localStorage.getItem('btp_perfil');
+          return saved ? JSON.parse(saved).apiKey || "" : "";
+        } catch { return ""; }
+      })();
+
+      if (!apiKey) {
+        setMessages(prev => [...prev, { role: 'model', text: "No hay API Key configurada. Ve a la pestaña de Perfil en BodyTrack Pro para añadirla." }]);
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: userMessage }] }],
+          systemInstruction: { parts: [{ text: "Eres el Coach IA personal de Pedro Falcon, un hombre de más de 44 años. Tu objetivo es ayudarle a optimizar su testosterona, mantener a raya el cortisol, y guiarlo en su plan híbrido (pesas + running zona 2). Reglas de Pedro: NUNCA hace peso muerto por su diástasis abdominal, debe exhalar al hacer fuerza, y usa CPAP (meta: IAH < 5.0). Responde de manera motivadora, científica, al punto y siempre en español." }] }
+        })
+      });
+      
+      const data = await response.json();
+      // FIX #1: optional chaining con índices [0] correctos
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Mmm, tuve un problema de conexión. ¿Puedes repetir eso?";
+      setMessages(prev => [...prev, { role: 'model', text: reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'model', text: "Error de red. Intenta conectarte de nuevo." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-180px)]">
+      <div className="bg-indigo-600 text-white p-8 rounded-[40px] shadow-lg border-b-[10px] border-indigo-800 mb-4 shrink-0 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        <SectionHeader color="text-indigo-100" icon={Bot}>Coach Bio-Hacking IA</SectionHeader>
+        <p className="text-sm font-black leading-tight italic tracking-tight">Análisis en tiempo real de tu metabolismo y rutinas.</p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-4 no-scrollbar pb-10">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-4 rounded-[25px] text-sm font-bold leading-snug shadow-sm ${m.role === 'user' ? 'bg-emerald-500 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'}`}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white border border-slate-100 p-4 rounded-[25px] rounded-bl-sm shadow-sm flex items-center space-x-2 text-indigo-500">
+              <Loader2 size={16} className="animate-spin" />
+              <span className="text-xs font-black uppercase tracking-widest">Analizando...</span>
+            </div>
+          </div>
+        )}
+        <div ref={endOfMessagesRef} />
+      </div>
+
+      <div className="mt-4 bg-white p-2 rounded-full shadow-lg border border-slate-100 flex items-center shrink-0">
+        <input 
+          type="text" 
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          placeholder="Pregúntame sobre tu plan..." 
+          className="flex-1 bg-transparent px-4 text-sm font-bold text-slate-700 outline-none"
+        />
+        <button onClick={handleSend} disabled={isLoading || !input.trim()} className="bg-indigo-500 text-white p-3 rounded-full shadow-md active:scale-95 disabled:opacity-50 transition-all">
+          <Send size={18} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- APP COMPONENT MAIN ---
+// FIX #7: Eliminado el segundo "export default function App" duplicado.
+// Solo existe un único componente App exportado.
 
 export default function App() {
   const [tab, setTab] = useState('home');
-  const [statTab, setStatTab] = useState('bio'); // 'bio', 'cardio' o 'comp'
+  const [statTab, setStatTab] = useState('bio');
   const [selectedDay, setSelectedDay] = useState(null);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-  // Persistencia de Logs Salud
-  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_3')) || []);
-  const [form, setForm] = useState({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
+  const [logs, setLogs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('f_logs_v_final_4')) || []; }
+    catch { return []; }
+  });
+  const [form, setForm] = useState({ 
+    height: '1.75', weight: '', iah: '', erec: 'Sí', 
+    waist: '', hip: '', neck: '', chest: '', arm: '', leg: '', calf: '',
+    fat: '', muscle: '', water: '', lean: '', photo: null
+  });
 
-  // Persistencia Cardio
-  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v3')) || []);
+  const [cardioLogs, setCardioLogs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('f_cardio_logs_v4')) || []; }
+    catch { return []; }
+  });
   const [cardioForm, setCardioForm] = useState({ distance: '', time: '', hr: '' });
 
-  // Persistencia Composición Física
-  const [compLogs, setCompLogs] = useState(() => JSON.parse(localStorage.getItem('f_comp_logs_v3')) || []);
-  const [compForm, setCompForm] = useState({ chest: '', arm: '', leg: '', calf: '', photo: null });
+  useEffect(() => { try { localStorage.setItem('f_logs_v_final_4', JSON.stringify(logs)); } catch {} }, [logs]);
+  useEffect(() => { try { localStorage.setItem('f_cardio_logs_v4', JSON.stringify(cardioLogs)); } catch {} }, [cardioLogs]);
 
-  useEffect(() => localStorage.setItem('f_logs_v_final_3', JSON.stringify(logs)), [logs]);
-  useEffect(() => localStorage.setItem('f_cardio_logs_v3', JSON.stringify(cardioLogs)), [cardioLogs]);
-  useEffect(() => localStorage.setItem('f_comp_logs_v3', JSON.stringify(compLogs)), [compLogs]);
+  // FIX #3: logs[0].height en lugar de logs.height (logs es un array)
+  useEffect(() => {
+    if (logs.length > 0 && logs[0].height && !form.height) {
+      setForm(prev => ({...prev, height: logs[0].height}));
+    }
+  }, [logs]);
 
   useEffect(() => {
     let int = null;
     if (isRunning && timer > 0) int = setInterval(() => setTimer(t => t - 1), 1000);
     else if (timer === 0 && isRunning) {
       setIsRunning(false);
-      if (navigator.vibrate) navigator.vibrate();
+      // FIX #6: vibrate con duración en ms
+      if (navigator.vibrate) navigator.vibrate(300);
     }
     return () => clearInterval(int);
   }, [isRunning, timer]);
 
   const startTimer = (s) => { setTimer(s); setIsRunning(true); };
 
+  const handlePhotoUpload = (e) => {
+    // FIX #2: files[0] para obtener el primer archivo; guard si no hay archivo
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        setForm({ ...form, photo: compressedBase64 });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const saveMetrics = () => {
-    if(!form.weight && !form.iah) return;
+    if(!form.weight) return;
+    
     let icc = '-';
+    let imc = '-';
+    
     if (form.waist && form.hip && parseFloat(form.hip) > 0) {
       icc = (parseFloat(form.waist) / parseFloat(form.hip)).toFixed(2);
     }
-    setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form, icc }, ...logs]);
-    setForm({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
+    if (form.weight && form.height && parseFloat(form.height) > 0) {
+      imc = (parseFloat(form.weight) / Math.pow(parseFloat(form.height), 2)).toFixed(1);
+    }
+    
+    setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form, icc, imc }, ...logs]);
+    
+    setForm(prev => ({ 
+      ...prev, weight: '', iah: '', erec: 'Sí', 
+      waist: '', hip: '', neck: '', chest: '', arm: '', leg: '', calf: '',
+      fat: '', muscle: '', water: '', lean: '', photo: null
+    }));
   };
 
   const saveCardio = () => {
@@ -330,36 +482,6 @@ export default function App() {
     setCardioForm({ distance: '', time: '', hr: '' });
   };
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files;
-    if (file) {
-      // Reducir tamaño de la imagen en base64 para evitar llenar el localStorage del iPhone
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-          setCompForm({ ...compForm, photo: compressedBase64 });
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const saveComp = () => {
-    if(!compForm.chest && !compForm.arm && !compForm.photo) return;
-    setCompLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...compForm }, ...compLogs]);
-    setCompForm({ chest: '', arm: '', leg: '', calf: '', photo: null });
-  };
-
   const handleCalendar = (day) => {
     const dayMap = { "Lunes": "MO", "Martes": "TU", "Miércoles": "WE", "Jueves": "TH", "Viernes": "FR", "Sábado": "SA", "Domingo": "SU" };
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Entreno Falcon: ' + day.type)}&recur=RRULE:FREQ=WEEKLY;BYDAY=${dayMap[day.day]}`;
@@ -369,7 +491,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#fcfdfe] text-slate-900 pb-36 sm:pb-40 font-sans antialiased overflow-x-hidden">
       
-      {/* HEADER PREMIUM */}
       <header className="bg-slate-900 text-white p-5 sm:p-6 sticky top-0 z-50 shadow-xl pt-[max(1.25rem,env(safe-area-inset-top))] border-b border-emerald-500/20 backdrop-blur-xl bg-opacity-95">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <div onClick={() => {setTab('home'); setSelectedDay(null);}} className="cursor-pointer active:opacity-70 transition-opacity">
@@ -384,7 +505,6 @@ export default function App() {
 
       <main className="max-w-md mx-auto p-4 sm:p-5">
         
-        {/* TAB: INICIO */}
         {tab === 'home' && selectedDay === null && (
           <div className="space-y-6 sm:space-y-8 animate-fade-in">
             <div className="bg-slate-900 rounded-[35px] sm:rounded-[45px] p-6 sm:p-7 text-white shadow-xl relative overflow-hidden border border-slate-800 ring-1 ring-white/5">
@@ -420,12 +540,10 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB: ENTRENO */}
         {tab === 'workout' && (
           <WorkoutView selectedDay={selectedDay} setSelectedDay={setSelectedDay} startTimer={startTimer} />
         )}
 
-        {/* TAB: DIETA */}
         {tab === 'diet' && (
           <div className="space-y-6 sm:space-y-8 animate-fade-in text-slate-900">
              <div className="bg-slate-900 text-white rounded-[45px] sm:rounded-[55px] p-10 sm:p-12 text-center shadow-xl border-b-[12px] border-emerald-500 relative overflow-hidden border border-slate-800">
@@ -468,96 +586,147 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB: SEGUIMIENTO (MÉTRICAS + CARDIO + COMPOSICIÓN) */}
         {tab === 'stats' && (
           <div className="space-y-6 animate-fade-in pb-12 text-slate-900">
             
-            {/* TABS INTERNAS DE SEGUIMIENTO (AHORA 3) */}
-            <div className="bg-slate-200/60 p-1.5 rounded-full flex mx-auto w-full max-w-sm shadow-inner mb-6 overflow-x-auto no-scrollbar">
-              <button onClick={() => setStatTab('bio')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'bio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Salud</button>
-              <button onClick={() => setStatTab('cardio')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'cardio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Cardio</button>
-              <button onClick={() => setStatTab('comp')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'comp' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Físico</button>
+            <div className="bg-slate-200/60 p-1.5 rounded-full flex mx-auto w-full max-w-[240px] shadow-inner mb-6">
+              <button onClick={() => setStatTab('bio')} className={`flex-1 py-3 px-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'bio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Físico & Salud</button>
+              <button onClick={() => setStatTab('cardio')} className={`flex-1 py-3 px-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'cardio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Cardio Z2</button>
             </div>
 
-            {/* SECCIÓN 1: BIOMETRÍA */}
             {statTab === 'bio' && (
-              <div className="bg-white rounded-[35px] border border-slate-100 p-5 sm:p-6 shadow-sm animate-fade-in">
-                <SectionHeader icon={LineChart}>Salud Corporal</SectionHeader>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Peso (kg)</label>
-                    <input type="number" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-indigo-500 uppercase ml-2 tracking-[0.1em]">IAH (CPAP)</label>
-                    <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cintura (cm)</label>
-                    <input type="number" value={form.waist} onChange={e=>setForm({...form, waist:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cadera (cm)</label>
-                    <input type="number" value={form.hip} onChange={e=>setForm({...form, hip:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cuello (cm)</label>
-                    <input type="number" value={form.neck} onChange={e=>setForm({...form, neck:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Erección</label>
-                    <select value={form.erec} onChange={e=>setForm({...form, erec:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none appearance-none text-center shadow-inner bg-no-repeat">
-                      <option>Sí</option><option>No</option>
-                    </select>
-                  </div>
-
-                  {form.waist && form.hip && (
-                    <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[20px] border border-slate-200 flex justify-between items-center shadow-inner">
-                      <div>
-                         <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest leading-none">Índice Cintura/Cadera</p>
-                         <p className="text-[8px] font-bold text-slate-400 mt-1.5 uppercase">Riesgo Alto si {">"} 0.90</p>
-                      </div>
-                      <span className={`text-2xl font-black ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-500' : 'text-emerald-500'}`}>
-                        {(form.waist/form.hip).toFixed(2)}
-                      </span>
+              <div className="space-y-6">
+                <div className="bg-white rounded-[35px] border border-slate-100 p-6 shadow-sm">
+                  <SectionHeader icon={LineChart} color="text-indigo-500">Evaluación Biológica</SectionHeader>
+                  
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">1. Medidas Base & Descanso</h4>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Altura (m)</label>
+                      <input type="number" step="0.01" value={form.height} onChange={e=>setForm({...form, height:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="1.75" />
                     </div>
-                  )}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Peso (kg)</label>
+                      <input type="number" step="0.1" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-indigo-500 uppercase ml-2 tracking-[0.1em]">IAH (CPAP)</label>
+                      <input type="number" step="0.1" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Erección</label>
+                      <select value={form.erec} onChange={e=>setForm({...form, erec:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none appearance-none text-center shadow-inner bg-no-repeat">
+                        <option>Sí</option><option>No</option>
+                      </select>
+                    </div>
+                  </div>
 
-                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-2 transition-all border-b-4 border-emerald-800">
-                    Guardar Salud
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">2. Composición (Báscula)</h4>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-emerald-500 uppercase ml-2 tracking-[0.1em]">Grasa %</label>
+                      <input type="number" step="0.1" value={form.fat} onChange={e=>setForm({...form, fat:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono text-emerald-700" placeholder="00.0" />
+                      <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-1">Normal: 15-20%</p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-blue-500 uppercase ml-2 tracking-[0.1em]">Músculo %</label>
+                      <input type="number" step="0.1" value={form.muscle} onChange={e=>setForm({...form, muscle:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-blue-500 transition-all text-center shadow-inner font-mono text-blue-700" placeholder="00.0" />
+                      <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-1">Normal: 33-39%</p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-cyan-500 uppercase ml-2 tracking-[0.1em]">Agua %</label>
+                      <input type="number" step="0.1" value={form.water} onChange={e=>setForm({...form, water:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-cyan-500 transition-all text-center shadow-inner font-mono text-cyan-700" placeholder="00.0" />
+                      <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-1">Normal: 50-65%</p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-orange-500 uppercase ml-2 tracking-[0.1em]">M. Magra (kg)</label>
+                      <input type="number" step="0.1" value={form.lean} onChange={e=>setForm({...form, lean:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono text-orange-700" placeholder="00.0" />
+                      <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-1">Hueso + Músculo</p>
+                    </div>
+                  </div>
+
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">3. Perímetros (Cinta)</h4>
+                  <div className="grid grid-cols-3 gap-2 mb-6">
+                    {['Cintura', 'Cadera', 'Cuello', 'Pecho', 'Brazo', 'Pierna', 'Pantorrilla'].map((metric, i) => {
+                      const keys = ['waist', 'hip', 'neck', 'chest', 'arm', 'leg', 'calf'];
+                      return (
+                        <div key={i} className="space-y-1">
+                          <label className="text-[8px] font-black text-slate-400 uppercase ml-1 tracking-tight">{metric}</label>
+                          <input type="number" step="0.1" value={form[keys[i]]} onChange={e=>setForm({...form, [keys[i]]:e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {form.weight && form.height && (
+                      <div className="bg-indigo-50 p-4 rounded-[20px] border border-indigo-100 flex flex-col justify-center items-center shadow-inner">
+                        <p className="text-[9px] font-black uppercase text-indigo-800 tracking-widest mb-1">IMC</p>
+                        <span className="text-2xl font-black text-indigo-600">{(parseFloat(form.weight) / Math.pow(parseFloat(form.height), 2)).toFixed(1)}</span>
+                        <p className="text-[8px] font-bold text-indigo-400 mt-1 uppercase">Normal: 18.5 - 24.9</p>
+                      </div>
+                    )}
+                    {form.waist && form.hip && (
+                      <div className={`p-4 rounded-[20px] border flex flex-col justify-center items-center shadow-inner ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                        <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-800' : 'text-emerald-800'}`}>ICC</p>
+                        <span className={`text-2xl font-black ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-500' : 'text-emerald-600'}`}>{(form.waist/form.hip).toFixed(2)}</span>
+                        <p className={`text-[8px] font-bold mt-1 uppercase ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-400' : 'text-emerald-500'}`}>Riesgo si {">"} 0.90</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-2">
+                    <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-indigo-200 rounded-2xl bg-indigo-50/50 cursor-pointer active:bg-indigo-50 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-2">
+                        {form.photo ? <CheckCircle size={24} className="text-emerald-500 mb-1" /> : <Camera size={24} className="text-indigo-400 mb-1" />}
+                        <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest mt-1">
+                          {form.photo ? 'Foto Adjuntada' : 'Tomar Foto Progreso'}
+                        </p>
+                      </div>
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} />
+                    </label>
+                  </div>
+
+                  <button onClick={saveMetrics} className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-indigo-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-4 border-indigo-800">
+                    Guardar Evaluación
                   </button>
                 </div>
 
                 {logs.length > 0 && (
-                  <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white scroll-smooth pb-2">
-                    <table className="w-full text-left text-[10px] sm:text-[11px] min-w-[360px]">
-                      <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
-                        <tr className="border-b border-slate-800">
-                          <th className="px-3 py-3 text-center">Fecha</th>
-                          <th className="px-3 py-3 text-center">Kg</th>
-                          <th className="px-3 py-3 text-center text-emerald-400">ICC</th>
-                          <th className="px-3 py-3 text-center text-slate-400">Cin/Cad</th>
-                          <th className="px-3 py-3 text-center">IAH</th>
-                          <th className="px-3 py-3 text-center">Erec.</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
-                          <td className="px-3 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')+'/'+l.date.split('/')}</td>
-                          <td className="px-3 py-3 text-center text-emerald-600 italic">{l.weight}</td>
-                          <td className="px-3 py-3 text-center font-black text-emerald-600">{l.icc || '-'}</td>
-                          <td className="px-3 py-3 text-center text-slate-400">{l.waist || '-'}/{l.hip || '-'}</td>
-                          <td className="px-3 py-3 text-center text-indigo-600">{l.iah || '-'}</td>
-                          <td className="px-3 py-3 text-center uppercase">{l.erec}</td>
-                        </tr>)}
-                      </tbody>
-                    </table>
+                  <div className="space-y-4">
+                    <SectionHeader icon={ImageIcon} color="text-slate-400">Historial de Revisiones</SectionHeader>
+                    {logs.map(l => (
+                      <div key={l.id} className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col space-y-4">
+                        <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                           <span className="text-xs font-black text-slate-800 uppercase tracking-widest">{l.date}</span>
+                           <span className="text-[10px] font-bold text-slate-400 uppercase">Erec: <span className="text-slate-700">{l.erec}</span> | IAH: <span className="text-indigo-500">{l.iah || '-'}</span></span>
+                        </div>
+                        
+                        <div className="flex items-start space-x-4">
+                          {l.photo ? (
+                            <div className="w-24 h-28 rounded-2xl bg-slate-200 shrink-0 overflow-hidden shadow-inner border border-slate-300">
+                              <img src={l.photo} alt="Progreso" className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-24 h-28 rounded-2xl bg-slate-50 shrink-0 flex flex-col items-center justify-center shadow-inner border border-slate-200 border-dashed">
+                               <ImageIcon size={24} className="text-slate-300 mb-2" />
+                               <span className="text-[8px] text-slate-400 font-bold uppercase">Sin Foto</span>
+                            </div>
+                          )}
+                          <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-3 text-[10px] font-bold text-slate-500">
+                            <div><span className="block text-[8px] uppercase tracking-widest text-slate-400">Peso / IMC</span><span className="text-sm font-black text-slate-800">{l.weight}k <span className="text-xs text-indigo-500">({l.imc})</span></span></div>
+                            <div><span className="block text-[8px] uppercase tracking-widest text-slate-400">ICC (Cint/Cad)</span><span className="text-sm font-black text-slate-800">{l.icc}</span></div>
+                            <div><span className="block text-[8px] uppercase tracking-widest text-slate-400">Grasa / Músc.</span><span className="text-sm font-black text-slate-800">{l.fat?l.fat+'%':'-'} / {l.muscle?l.muscle+'%':'-'}</span></div>
+                            <div><span className="block text-[8px] uppercase tracking-widest text-slate-400">Pecho / Brazo</span><span className="text-sm font-black text-slate-800">{l.chest || '-'} / {l.arm || '-'}</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             )}
 
-            {/* SECCIÓN 2: CARDIO Y RITMO ZONA 2 */}
             {statTab === 'cardio' && (
               <div className="bg-white rounded-[35px] border border-slate-100 p-5 sm:p-6 shadow-sm animate-fade-in">
                 <SectionHeader icon={ActivitySquare} color="text-orange-500">Progreso Zona 2</SectionHeader>
@@ -595,123 +764,38 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {cardioLogs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
-                          <td className="px-1 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')+'/'+l.date.split('/')}</td>
-                          <td className="px-1 py-3 text-center tracking-tight">{l.distance}k</td>
-                          <td className="px-1 py-3 text-center text-orange-600 font-black italic tracking-tighter">{l.pace} <span className="text-[8px] opacity-60">/k</span></td>
-                          <td className="px-1 py-3 text-center text-red-600">{l.hr || '-'}</td>
-                        </tr>)}
+                        {cardioLogs.map(l => {
+                          // FIX #4: Formato de fecha correcto usando split y join
+                          const dateParts = l.date.split('/');
+                          const shortDate = dateParts.length >= 2 ? `${dateParts[0]}/${dateParts[1]}` : l.date;
+                          return (
+                            <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
+                              <td className="px-1 py-3 text-center text-slate-400 tracking-tight">{shortDate}</td>
+                              <td className="px-1 py-3 text-center tracking-tight">{l.distance}k</td>
+                              <td className="px-1 py-3 text-center text-orange-600 font-black italic tracking-tighter">{l.pace} <span className="text-[8px] opacity-60">/k</span></td>
+                              <td className="px-1 py-3 text-center text-red-600">{l.hr || '-'}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
                 )}
               </div>
             )}
-
-            {/* SECCIÓN 3: COMPOSICIÓN CORPORAL (FÍSICO) */}
-            {statTab === 'comp' && (
-              <div className="bg-white rounded-[35px] border border-slate-100 p-5 sm:p-6 shadow-sm animate-fade-in">
-                <SectionHeader icon={Camera} color="text-indigo-500">Composición y Fotos</SectionHeader>
-                
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pecho (cm)</label>
-                    <input type="number" value={compForm.chest} onChange={e=>setCompForm({...compForm, chest:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Brazo (cm)</label>
-                    <input type="number" value={compForm.arm} onChange={e=>setCompForm({...compForm, arm:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pierna (cm)</label>
-                    <input type="number" value={compForm.leg} onChange={e=>setCompForm({...compForm, leg:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pantorrilla (cm)</label>
-                    <input type="number" value={compForm.calf} onChange={e=>setCompForm({...compForm, calf:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
-                  </div>
-                  
-                  {/* UPLOAD FOTO */}
-                  <div className="col-span-2 mt-2">
-                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-indigo-200 rounded-2xl bg-indigo-50/50 cursor-pointer active:bg-indigo-50 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        {compForm.photo ? (
-                           <CheckCircle size={28} className="text-emerald-500 mb-1" />
-                        ) : (
-                           <ImageIcon size={28} className="text-indigo-400 mb-1" />
-                        )}
-                        <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mt-1">
-                          {compForm.photo ? 'Foto Capturada' : 'Tomar Foto Progreso'}
-                        </p>
-                      </div>
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} />
-                    </label>
-                  </div>
-
-                  <button onClick={saveComp} className="col-span-2 bg-indigo-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-indigo-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-4 border-indigo-800">
-                    Guardar Físico
-                  </button>
-                </div>
-
-                {/* GALERÍA DE PROGRESO */}
-                {compLogs.length > 0 && (
-                  <div className="space-y-4">
-                    <SectionHeader icon={ImageIcon} color="text-slate-400">Historial Físico</SectionHeader>
-                    {compLogs.map(l => (
-                      <div key={l.id} className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-sm flex items-start space-x-4">
-                        {l.photo ? (
-                          <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0 overflow-hidden shadow-inner border border-slate-300">
-                            <img src={l.photo} alt="Progreso" className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0 flex items-center justify-center shadow-inner border border-slate-300">
-                             <ImageIcon size={24} className="text-slate-400" />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">{l.date}</p>
-                           <div className="grid grid-cols-2 gap-1 text-[10px] font-bold text-slate-600">
-                             <p>Pec: <span className="text-indigo-600 font-black">{l.chest || '-'}</span></p>
-                             <p>Brz: <span className="text-indigo-600 font-black">{l.arm || '-'}</span></p>
-                             <p>Pier: <span className="text-indigo-600 font-black">{l.leg || '-'}</span></p>
-                             <p>Gem: <span className="text-indigo-600 font-black">{l.calf || '-'}</span></p>
-                           </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
 
-        {/* TAB: GUÍA */}
-        {tab === 'guide' && (
-          <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
-            <div className="bg-emerald-600 text-white p-8 sm:p-10 rounded-[45px] sm:rounded-[60px] shadow-xl border-b-[10px] border-emerald-800 relative overflow-hidden">
-               <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -ml-20 -mt-20 blur-3xl opacity-60"></div>
-              <SectionHeader color="text-emerald-100" icon={ShieldAlert}>Respiración Biomecánica</SectionHeader>
-              <p className="text-base sm:text-lg font-black leading-tight italic border-l-4 border-white/30 pl-5 tracking-tight uppercase">"Sopla el aire con fuerza absoluta y contrae el ombligo mientras vences la carga."</p>
-              <p className="text-[11px] sm:text-[12px] font-bold text-emerald-100 mt-4 opacity-90 leading-snug">Esto activa el transverso abdominal, creando una faja de seguridad biológica para tu diástasis.</p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-[35px] border-l-[15px] border-indigo-500 shadow-sm hover:shadow-md">
-              <h4 className="font-black text-indigo-900 text-base uppercase mb-2 tracking-tighter">Oxigenación CPAP</h4>
-              <p className="text-xs sm:text-sm text-slate-500 font-black leading-snug tracking-tight">"Sin oxigenación nocturna, el entreno te fatigará más y no ganarás músculo. Mantén tu IAH bajo 5.0 siempre."</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-[35px] border-l-[15px] border-orange-500 shadow-sm hover:shadow-md">
-              <h4 className="font-black text-orange-900 text-base uppercase mb-2 tracking-tighter">Doble Progresión</h4>
-              <p className="text-xs sm:text-sm text-slate-500 font-black leading-snug tracking-tight uppercase">Prioriza el TEMPO 3-1-2-1.<br/><span className="text-slate-400 font-bold lowercase text-[11px] sm:text-[12px]">Sube peso solo si mantienes el control abdominal perfecto.</span></p>
-            </div>
+        {tab === 'coach' && (
+          <div className="animate-fade-in">
+            <CoachIA />
           </div>
         )}
       </main>
 
-      {/* TIMER PREMIUM FLOTANTE (OPTIMIZADO MÓVIL) */}
+      {/* FIX #5: z-50 en lugar de z- (clase CSS inválida) */}
       {(timer > 0 || isRunning) && (
-        <div className="fixed bottom-[85px] sm:bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-between z- border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
+        <div className="fixed bottom-[85px] sm:bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-between z-50 border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative">
               <Timer size={28} className={timer === 0 ? "text-red-500 animate-pulse" : "text-emerald-400"} />
@@ -728,7 +812,6 @@ export default function App() {
         </div>
       )}
 
-      {/* NAVEGACIÓN INFERIOR PREMIUM (OPTIMIZADA MÓVIL PARA 5 BOTONES) */}
       <nav className="bg-slate-900 fixed bottom-0 w-full border-t border-slate-800 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md bg-opacity-98">
         <div className="max-w-md mx-auto flex justify-between items-center px-1 sm:px-2">
           {[
@@ -736,7 +819,7 @@ export default function App() {
             { id: 'workout', icon: Dumbbell, label: 'Entreno' },
             { id: 'diet', icon: Apple, label: 'Dieta' },
             { id: 'stats', icon: Activity, label: 'Avance' },
-            { id: 'guide', icon: BookOpen, label: 'Guía' }
+            { id: 'coach', icon: Bot, label: 'Coach IA' }
           ].map((item) => (
             <button key={item.id} onClick={() => {setTab(item.id); setSelectedDay(null);}} className={`flex flex-col items-center justify-center w-[20%] py-4 sm:py-5 transition-all duration-300 ${tab === item.id ? 'text-emerald-400 -translate-y-1' : 'text-slate-500 hover:text-slate-400'}`}>
               <item.icon size={22} className={tab === item.id ? "drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : ""} />
