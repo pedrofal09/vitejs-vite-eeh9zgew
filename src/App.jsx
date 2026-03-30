@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Home, Dumbbell, Apple, Activity, BookOpen, PlayCircle, Clock, Info,
   ShieldAlert, Zap, Flame, Plus, Trash2, LineChart, Timer, X,
-  Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight, ActivitySquare
+  Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight, ActivitySquare,
+  Camera, Image as ImageIcon
 } from 'lucide-react';
 
 // --- DATA MASTER: ESTRUCTURA DEL PLAN ---
@@ -48,11 +49,10 @@ const BLOCK_C = [
   { name: "Bird-Dog (Estabilización)", sets: 3, reps: "10/lado", tempo: "2-1-2-1", rest: "45", yt: "Bird dog exercise diastasis safe", notes: "" }
 ];
 
-// ORDEN ÓPTIMO (Evita fatiga de piernas por el cardio)
 const SCHEDULE = [
   { day: "Lunes", type: "Pierna & Core (A)", target: "Testosterona", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
-  { day: "Martes", type: "Cardio Zona 2", target: "Grasa Visceral", time: "4AM / 7PM", isRunning: true, zone: "105-123 ppm", duration: "45-60 min" },
-  { day: "Miércoles", type: "Empuje (B)", target: "Pectoral / Gineco", time: "4AM / 7PM", exercises: BLOCK_B, hasWarmup: true },
+  { day: "Martes", type: "Empuje (B)", target: "Pectoral / Gineco", time: "4AM / 7PM", exercises: BLOCK_B, hasWarmup: true },
+  { day: "Miércoles", type: "Cardio Zona 2", target: "Grasa Visceral", time: "4AM / 7PM", isRunning: true, zone: "105-123 ppm", duration: "45-60 min" },
   { day: "Jueves", type: "Tracción (C) + HIIT", target: "Postura / GH", time: "4AM / 7PM", exercises: BLOCK_C, hasWarmup: true, hasHIIT: true },
   { day: "Viernes", type: "Pierna & Core (A)", target: "Salud Pélvica", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
   { day: "Sábado", type: "Movilidad Activa", target: "Cortisol", time: "Mañana", isMobility: true },
@@ -272,21 +272,26 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
 
 export default function App() {
   const [tab, setTab] = useState('home');
-  const [statTab, setStatTab] = useState('bio'); // 'bio' o 'cardio'
+  const [statTab, setStatTab] = useState('bio'); // 'bio', 'cardio' o 'comp'
   const [selectedDay, setSelectedDay] = useState(null);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-  // Persistencia de Logs
-  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_2')) || []);
+  // Persistencia de Logs Salud
+  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_3')) || []);
   const [form, setForm] = useState({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
 
   // Persistencia Cardio
-  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v2')) || []);
+  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v3')) || []);
   const [cardioForm, setCardioForm] = useState({ distance: '', time: '', hr: '' });
 
-  useEffect(() => localStorage.setItem('f_logs_v_final_2', JSON.stringify(logs)), [logs]);
-  useEffect(() => localStorage.setItem('f_cardio_logs_v2', JSON.stringify(cardioLogs)), [cardioLogs]);
+  // Persistencia Composición Física
+  const [compLogs, setCompLogs] = useState(() => JSON.parse(localStorage.getItem('f_comp_logs_v3')) || []);
+  const [compForm, setCompForm] = useState({ chest: '', arm: '', leg: '', calf: '', photo: null });
+
+  useEffect(() => localStorage.setItem('f_logs_v_final_3', JSON.stringify(logs)), [logs]);
+  useEffect(() => localStorage.setItem('f_cardio_logs_v3', JSON.stringify(cardioLogs)), [cardioLogs]);
+  useEffect(() => localStorage.setItem('f_comp_logs_v3', JSON.stringify(compLogs)), [compLogs]);
 
   useEffect(() => {
     let int = null;
@@ -302,34 +307,57 @@ export default function App() {
 
   const saveMetrics = () => {
     if(!form.weight && !form.iah) return;
-    
-    // Cálculo de Índice Cintura/Cadera (ICC)
     let icc = '-';
     if (form.waist && form.hip && parseFloat(form.hip) > 0) {
       icc = (parseFloat(form.waist) / parseFloat(form.hip)).toFixed(2);
     }
-    
     setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form, icc }, ...logs]);
     setForm({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
   };
 
   const saveCardio = () => {
     if(!cardioForm.distance || !cardioForm.time) return;
-    
-    // Calculo de ritmo (Pace) min/km
     const d = parseFloat(cardioForm.distance);
     const t = parseFloat(cardioForm.time);
     let paceFormatted = "0:00";
-    
     if(d > 0 && t > 0) {
       const rawPace = t / d;
       const mins = Math.floor(rawPace);
       const secs = Math.round((rawPace - mins) * 60).toString().padStart(2, '0');
       paceFormatted = `${mins}:${secs}`;
     }
-
     setCardioLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...cardioForm, pace: paceFormatted }, ...cardioLogs]);
     setCardioForm({ distance: '', time: '', hr: '' });
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files;
+    if (file) {
+      // Reducir tamaño de la imagen en base64 para evitar llenar el localStorage del iPhone
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          setCompForm({ ...compForm, photo: compressedBase64 });
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const saveComp = () => {
+    if(!compForm.chest && !compForm.arm && !compForm.photo) return;
+    setCompLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...compForm }, ...compLogs]);
+    setCompForm({ chest: '', arm: '', leg: '', calf: '', photo: null });
   };
 
   const handleCalendar = (day) => {
@@ -440,14 +468,15 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB: SEGUIMIENTO (MÉTRICAS + CARDIO) OPTIMIZADO CELULAR */}
+        {/* TAB: SEGUIMIENTO (MÉTRICAS + CARDIO + COMPOSICIÓN) */}
         {tab === 'stats' && (
           <div className="space-y-6 animate-fade-in pb-12 text-slate-900">
             
-            {/* TABS INTERNAS DE SEGUIMIENTO */}
-            <div className="bg-slate-200/60 p-1 rounded-full flex mx-auto max-w-[260px] shadow-inner mb-6">
-              <button onClick={() => setStatTab('bio')} className={`flex-1 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'bio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Biometría</button>
-              <button onClick={() => setStatTab('cardio')} className={`flex-1 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'cardio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Cardio Z2</button>
+            {/* TABS INTERNAS DE SEGUIMIENTO (AHORA 3) */}
+            <div className="bg-slate-200/60 p-1.5 rounded-full flex mx-auto w-full max-w-sm shadow-inner mb-6 overflow-x-auto no-scrollbar">
+              <button onClick={() => setStatTab('bio')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'bio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Salud</button>
+              <button onClick={() => setStatTab('cardio')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'cardio' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Cardio</button>
+              <button onClick={() => setStatTab('comp')} className={`flex-1 py-3 px-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${statTab === 'comp' ? 'bg-white text-emerald-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700'}`}>Físico</button>
             </div>
 
             {/* SECCIÓN 1: BIOMETRÍA */}
@@ -482,12 +511,11 @@ export default function App() {
                     </select>
                   </div>
 
-                  {/* CÁLCULO EN VIVO ICC */}
                   {form.waist && form.hip && (
-                    <div className="col-span-2 mt-3 bg-slate-50 p-4 rounded-[20px] border border-slate-200 flex justify-between items-center shadow-inner transition-all">
+                    <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[20px] border border-slate-200 flex justify-between items-center shadow-inner">
                       <div>
                          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest leading-none">Índice Cintura/Cadera</p>
-                         <p className="text-[8px] font-bold text-slate-400 mt-1.5 uppercase">Riesgo Alto {">"} 0.90</p>
+                         <p className="text-[8px] font-bold text-slate-400 mt-1.5 uppercase">Riesgo Alto si {">"} 0.90</p>
                       </div>
                       <span className={`text-2xl font-black ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-500' : 'text-emerald-500'}`}>
                         {(form.waist/form.hip).toFixed(2)}
@@ -495,33 +523,31 @@ export default function App() {
                     </div>
                   )}
 
-                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-4 border-emerald-800">
-                    Guardar Datos
+                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-2 transition-all border-b-4 border-emerald-800">
+                    Guardar Salud
                   </button>
                 </div>
 
                 {logs.length > 0 && (
-                  <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white scroll-smooth">
-                    <table className="w-full text-left text-[10px] sm:text-[11px] min-w-[400px] whitespace-nowrap">
+                  <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white scroll-smooth pb-2">
+                    <table className="w-full text-left text-[10px] sm:text-[11px] min-w-[360px]">
                       <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
                         <tr className="border-b border-slate-800">
                           <th className="px-3 py-3 text-center">Fecha</th>
                           <th className="px-3 py-3 text-center">Kg</th>
                           <th className="px-3 py-3 text-center text-emerald-400">ICC</th>
-                          <th className="px-3 py-3 text-center text-slate-400">Cint/Cad</th>
-                          <th className="px-3 py-3 text-center">Cuello</th>
+                          <th className="px-3 py-3 text-center text-slate-400">Cin/Cad</th>
                           <th className="px-3 py-3 text-center">IAH</th>
                           <th className="px-3 py-3 text-center">Erec.</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50 transition-colors">
+                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
                           <td className="px-3 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')+'/'+l.date.split('/')}</td>
-                          <td className="px-3 py-3 text-center text-emerald-600 italic tracking-tight">{l.weight}</td>
+                          <td className="px-3 py-3 text-center text-emerald-600 italic">{l.weight}</td>
                           <td className="px-3 py-3 text-center font-black text-emerald-600">{l.icc || '-'}</td>
-                          <td className="px-3 py-3 text-center text-slate-400 tracking-tight">{l.waist || '-'}/{l.hip || '-'}</td>
-                          <td className="px-3 py-3 text-center tracking-tight">{l.neck || '-'}</td>
-                          <td className="px-3 py-3 text-center text-indigo-600 tracking-tight">{l.iah || '-'}</td>
+                          <td className="px-3 py-3 text-center text-slate-400">{l.waist || '-'}/{l.hip || '-'}</td>
+                          <td className="px-3 py-3 text-center text-indigo-600">{l.iah || '-'}</td>
                           <td className="px-3 py-3 text-center uppercase">{l.erec}</td>
                         </tr>)}
                       </tbody>
@@ -577,6 +603,82 @@ export default function App() {
                         </tr>)}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECCIÓN 3: COMPOSICIÓN CORPORAL (FÍSICO) */}
+            {statTab === 'comp' && (
+              <div className="bg-white rounded-[35px] border border-slate-100 p-5 sm:p-6 shadow-sm animate-fade-in">
+                <SectionHeader icon={Camera} color="text-indigo-500">Composición y Fotos</SectionHeader>
+                
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pecho (cm)</label>
+                    <input type="number" value={compForm.chest} onChange={e=>setCompForm({...compForm, chest:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Brazo (cm)</label>
+                    <input type="number" value={compForm.arm} onChange={e=>setCompForm({...compForm, arm:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pierna (cm)</label>
+                    <input type="number" value={compForm.leg} onChange={e=>setCompForm({...compForm, leg:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Pantorrilla (cm)</label>
+                    <input type="number" value={compForm.calf} onChange={e=>setCompForm({...compForm, calf:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  
+                  {/* UPLOAD FOTO */}
+                  <div className="col-span-2 mt-2">
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-indigo-200 rounded-2xl bg-indigo-50/50 cursor-pointer active:bg-indigo-50 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        {compForm.photo ? (
+                           <CheckCircle size={28} className="text-emerald-500 mb-1" />
+                        ) : (
+                           <ImageIcon size={28} className="text-indigo-400 mb-1" />
+                        )}
+                        <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mt-1">
+                          {compForm.photo ? 'Foto Capturada' : 'Tomar Foto Progreso'}
+                        </p>
+                      </div>
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} />
+                    </label>
+                  </div>
+
+                  <button onClick={saveComp} className="col-span-2 bg-indigo-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-indigo-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-4 border-indigo-800">
+                    Guardar Físico
+                  </button>
+                </div>
+
+                {/* GALERÍA DE PROGRESO */}
+                {compLogs.length > 0 && (
+                  <div className="space-y-4">
+                    <SectionHeader icon={ImageIcon} color="text-slate-400">Historial Físico</SectionHeader>
+                    {compLogs.map(l => (
+                      <div key={l.id} className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-sm flex items-start space-x-4">
+                        {l.photo ? (
+                          <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0 overflow-hidden shadow-inner border border-slate-300">
+                            <img src={l.photo} alt="Progreso" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0 flex items-center justify-center shadow-inner border border-slate-300">
+                             <ImageIcon size={24} className="text-slate-400" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">{l.date}</p>
+                           <div className="grid grid-cols-2 gap-1 text-[10px] font-bold text-slate-600">
+                             <p>Pec: <span className="text-indigo-600 font-black">{l.chest || '-'}</span></p>
+                             <p>Brz: <span className="text-indigo-600 font-black">{l.arm || '-'}</span></p>
+                             <p>Pier: <span className="text-indigo-600 font-black">{l.leg || '-'}</span></p>
+                             <p>Gem: <span className="text-indigo-600 font-black">{l.calf || '-'}</span></p>
+                           </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -647,10 +749,11 @@ export default function App() {
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.19, 0.22, 1) forwards; }
         body { -webkit-tap-highlight-color: transparent; background-color: #fcfdfe; }
         * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        ::-webkit-scrollbar { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
     </div>
   );
