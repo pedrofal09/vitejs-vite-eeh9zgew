@@ -27,7 +27,7 @@ const BLOCK_A = [
   { name: "Sentadilla con Barra Libre", sets: 4, reps: "8-10", tempo: "3-1-2-1", rest: "120", yt: "Barbell back squat proper form", notes: "MOTOR DE TESTOSTERONA. Exhala y mete el ombligo al subir." },
   { name: "Hip Thrust con Barra", sets: 4, reps: "10-12", tempo: "2-0-X-2", rest: "90", yt: "Barbell hip thrust form", notes: "Usa banco y colchoneta en cadera. Empuje explosivo." },
   { name: "Sentadilla Búlgara", sets: 3, reps: "10-12/p", tempo: "3-1-2-1", rest: "60", yt: "Dumbbell Bulgarian Split Squat", notes: "Apoya empeine atrás. Equilibra fuerza unilateral." },
-  { name: "Curl de Isquiotibiales", sets: 3, reps: "12-15", tempo: "3-1-2-1", rest: "60", yt: "Dumbbell lying leg curl bench", notes: "Acuéstate boca abajo en el banco." },
+  { name: "Zancada Inversa (Mancuernas)", sets: 3, reps: "10-12/p", tempo: "3-1-2-1", rest: "60", yt: "Dumbbell reverse lunge proper form", notes: "Paso hacia atrás. Protege las rodillas y activa fuertemente glúteos y piernas." },
   { name: "Elevación de Talones", sets: 4, reps: "15-20", tempo: "2-1-1-2", rest: "60", yt: "Standing calf raise form", notes: "" },
   { name: "Toques de Talón (Heel Taps)", sets: 3, reps: "10-12/p", tempo: "Muy lento", rest: "45", yt: "Heel taps diastasis recti safe core", notes: "Core terapéutico para cerrar diástasis." }
 ];
@@ -48,14 +48,15 @@ const BLOCK_C = [
   { name: "Bird-Dog (Estabilización)", sets: 3, reps: "10/lado", tempo: "2-1-2-1", rest: "45", yt: "Bird dog exercise diastasis safe", notes: "" }
 ];
 
+// ORDEN ÓPTIMO (Evita fatiga de piernas por el cardio)
 const SCHEDULE = [
   { day: "Lunes", type: "Pierna & Core (A)", target: "Testosterona", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
   { day: "Martes", type: "Cardio Zona 2", target: "Grasa Visceral", time: "4AM / 7PM", isRunning: true, zone: "105-123 ppm", duration: "45-60 min" },
   { day: "Miércoles", type: "Empuje (B)", target: "Pectoral / Gineco", time: "4AM / 7PM", exercises: BLOCK_B, hasWarmup: true },
-  { day: "Jueves", type: "Pierna & Core (A)", target: "Salud Pélvica", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
-  { day: "Viernes", type: "Tracción (C) + HIIT", target: "Postura / GH", time: "4AM / 7PM", exercises: BLOCK_C, hasWarmup: true, hasHIIT: true },
-  { day: "Sábado", type: "Carrera Controlada", target: "Base Aeróbica", time: "Mañana", isRunning: true, zone: "115-135 ppm", duration: "60-75 min", notes: "LÍMITE CORTISOL: No exceder los 75 min. Mantener FC controlada." },
-  { day: "Domingo", type: "Movilidad Activa", target: "Cortisol", time: "Mañana", isMobility: true },
+  { day: "Jueves", type: "Tracción (C) + HIIT", target: "Postura / GH", time: "4AM / 7PM", exercises: BLOCK_C, hasWarmup: true, hasHIIT: true },
+  { day: "Viernes", type: "Pierna & Core (A)", target: "Salud Pélvica", time: "4AM / 7PM", exercises: BLOCK_A, hasWarmup: true },
+  { day: "Sábado", type: "Movilidad Activa", target: "Cortisol", time: "Mañana", isMobility: true },
+  { day: "Domingo", type: "Carrera Controlada", target: "Base Aeróbica", time: "Mañana", isRunning: true, zone: "115-135 ppm", duration: "60-75 min", notes: "LÍMITE CORTISOL: No exceder los 75 min. Mantener FC controlada." },
 ];
 
 // --- COMPONENTES DE UI ---
@@ -277,22 +278,22 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false);
 
   // Persistencia de Logs
-  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_1')) || []);
-  const [form, setForm] = useState({ weight: '', waist: '', iah: '', erec: 'Sí' });
+  const [logs, setLogs] = useState(() => JSON.parse(localStorage.getItem('f_logs_v_final_2')) || []);
+  const [form, setForm] = useState({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
 
   // Persistencia Cardio
-  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v1')) || []);
+  const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_logs_v2')) || []);
   const [cardioForm, setCardioForm] = useState({ distance: '', time: '', hr: '' });
 
-  useEffect(() => localStorage.setItem('f_logs_v_final_1', JSON.stringify(logs)), [logs]);
-  useEffect(() => localStorage.setItem('f_cardio_logs_v1', JSON.stringify(cardioLogs)), [cardioLogs]);
+  useEffect(() => localStorage.setItem('f_logs_v_final_2', JSON.stringify(logs)), [logs]);
+  useEffect(() => localStorage.setItem('f_cardio_logs_v2', JSON.stringify(cardioLogs)), [cardioLogs]);
 
   useEffect(() => {
     let int = null;
     if (isRunning && timer > 0) int = setInterval(() => setTimer(t => t - 1), 1000);
     else if (timer === 0 && isRunning) {
       setIsRunning(false);
-      if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+      if (navigator.vibrate) navigator.vibrate();
     }
     return () => clearInterval(int);
   }, [isRunning, timer]);
@@ -301,8 +302,15 @@ export default function App() {
 
   const saveMetrics = () => {
     if(!form.weight && !form.iah) return;
-    setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form }, ...logs]);
-    setForm({ weight: '', waist: '', iah: '', erec: 'Sí' });
+    
+    // Cálculo de Índice Cintura/Cadera (ICC)
+    let icc = '-';
+    if (form.waist && form.hip && parseFloat(form.hip) > 0) {
+      icc = (parseFloat(form.waist) / parseFloat(form.hip)).toFixed(2);
+    }
+    
+    setLogs([{ id: Date.now(), date: new Date().toLocaleDateString(), ...form, icc }, ...logs]);
+    setForm({ weight: '', waist: '', hip: '', neck: '', iah: '', erec: 'Sí' });
   };
 
   const saveCardio = () => {
@@ -351,6 +359,19 @@ export default function App() {
         {/* TAB: INICIO */}
         {tab === 'home' && selectedDay === null && (
           <div className="space-y-6 sm:space-y-8 animate-fade-in">
+            <div className="bg-slate-900 rounded-[35px] sm:rounded-[45px] p-6 sm:p-7 text-white shadow-xl relative overflow-hidden border border-slate-800 ring-1 ring-white/5">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse"></div>
+              <div className="relative z-10 flex items-start space-x-4">
+                <div className="bg-red-600 p-3 sm:p-4 rounded-2xl shadow-lg border border-red-500/50">
+                  <ShieldAlert size={28} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mb-1.5">Protocolo Clínico</p>
+                  <p className="text-[13px] sm:text-[15px] font-black leading-snug text-slate-100 uppercase tracking-tight italic">Peso muerto prohibido.<br/><span className="text-slate-400 font-bold lowercase text-[11px] sm:text-[12px] opacity-90 tracking-normal">Cierra tu diástasis con exhalación biomecánica.</span></p>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <SectionHeader icon={Clock}>Calendario de Optimización</SectionHeader>
               <div className="grid gap-4 sm:gap-5">
@@ -439,12 +460,20 @@ export default function App() {
                     <input type="number" value={form.weight} onChange={e=>setForm({...form, weight:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
                   </div>
                   <div className="space-y-1">
+                    <label className="text-[9px] font-black text-indigo-500 uppercase ml-2 tracking-[0.1em]">IAH (CPAP)</label>
+                    <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cintura (cm)</label>
                     <input type="number" value={form.waist} onChange={e=>setForm({...form, waist:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-indigo-500 uppercase ml-2 tracking-[0.1em]">IAH (CPAP)</label>
-                    <input type="number" value={form.iah} onChange={e=>setForm({...form, iah:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cadera (cm)</label>
+                    <input type="number" value={form.hip} onChange={e=>setForm({...form, hip:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Cuello (cm)</label>
+                    <input type="number" value={form.neck} onChange={e=>setForm({...form, neck:e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder="00" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Erección</label>
@@ -452,28 +481,48 @@ export default function App() {
                       <option>Sí</option><option>No</option>
                     </select>
                   </div>
-                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-2 transition-all border-b-4 border-emerald-800">
+
+                  {/* CÁLCULO EN VIVO ICC */}
+                  {form.waist && form.hip && (
+                    <div className="col-span-2 mt-3 bg-slate-50 p-4 rounded-[20px] border border-slate-200 flex justify-between items-center shadow-inner transition-all">
+                      <div>
+                         <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest leading-none">Índice Cintura/Cadera</p>
+                         <p className="text-[8px] font-bold text-slate-400 mt-1.5 uppercase">Riesgo Alto {">"} 0.90</p>
+                      </div>
+                      <span className={`text-2xl font-black ${(form.waist/form.hip).toFixed(2) >= 0.90 ? 'text-red-500' : 'text-emerald-500'}`}>
+                        {(form.waist/form.hip).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <button onClick={saveMetrics} className="col-span-2 bg-emerald-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-emerald-500/30 uppercase tracking-[0.2em] mt-3 transition-all border-b-4 border-emerald-800">
                     Guardar Datos
                   </button>
                 </div>
 
                 {logs.length > 0 && (
-                  <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 shadow-sm bg-white">
-                    <table className="w-full text-left text-[10px] sm:text-[11px]">
+                  <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white scroll-smooth">
+                    <table className="w-full text-left text-[10px] sm:text-[11px] min-w-[400px] whitespace-nowrap">
                       <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
                         <tr className="border-b border-slate-800">
-                          <th className="px-2 py-3 text-center">Fecha</th>
-                          <th className="px-2 py-3 text-center">Kg</th>
-                          <th className="px-2 py-3 text-center">IAH</th>
-                          <th className="px-2 py-3 text-center">Erec.</th>
+                          <th className="px-3 py-3 text-center">Fecha</th>
+                          <th className="px-3 py-3 text-center">Kg</th>
+                          <th className="px-3 py-3 text-center text-emerald-400">ICC</th>
+                          <th className="px-3 py-3 text-center text-slate-400">Cint/Cad</th>
+                          <th className="px-3 py-3 text-center">Cuello</th>
+                          <th className="px-3 py-3 text-center">IAH</th>
+                          <th className="px-3 py-3 text-center">Erec.</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
-                          <td className="px-2 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
-                          <td className="px-2 py-3 text-center text-emerald-600 italic tracking-tight">{l.weight}</td>
-                          <td className="px-2 py-3 text-center text-indigo-600 tracking-tight">{l.iah || '-'}</td>
-                          <td className="px-2 py-3 text-center uppercase">{l.erec}</td>
+                        {logs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50 transition-colors">
+                          <td className="px-3 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')+'/'+l.date.split('/')}</td>
+                          <td className="px-3 py-3 text-center text-emerald-600 italic tracking-tight">{l.weight}</td>
+                          <td className="px-3 py-3 text-center font-black text-emerald-600">{l.icc || '-'}</td>
+                          <td className="px-3 py-3 text-center text-slate-400 tracking-tight">{l.waist || '-'}/{l.hip || '-'}</td>
+                          <td className="px-3 py-3 text-center tracking-tight">{l.neck || '-'}</td>
+                          <td className="px-3 py-3 text-center text-indigo-600 tracking-tight">{l.iah || '-'}</td>
+                          <td className="px-3 py-3 text-center uppercase">{l.erec}</td>
                         </tr>)}
                       </tbody>
                     </table>
@@ -521,7 +570,7 @@ export default function App() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {cardioLogs.map(l => <tr key={l.id} className="font-bold text-slate-700 active:bg-slate-50">
-                          <td className="px-1 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')[0]+'/'+l.date.split('/')[1]}</td>
+                          <td className="px-1 py-3 text-center text-slate-400 tracking-tight">{l.date.split('/')+'/'+l.date.split('/')}</td>
                           <td className="px-1 py-3 text-center tracking-tight">{l.distance}k</td>
                           <td className="px-1 py-3 text-center text-orange-600 font-black italic tracking-tighter">{l.pace} <span className="text-[8px] opacity-60">/k</span></td>
                           <td className="px-1 py-3 text-center text-red-600">{l.hr || '-'}</td>
@@ -560,7 +609,7 @@ export default function App() {
 
       {/* TIMER PREMIUM FLOTANTE (OPTIMIZADO MÓVIL) */}
       {(timer > 0 || isRunning) && (
-        <div className="fixed bottom-[85px] sm:bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-between z-[100] border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
+        <div className="fixed bottom-[85px] sm:bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-between z- border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative">
               <Timer size={28} className={timer === 0 ? "text-red-500 animate-pulse" : "text-emerald-400"} />
