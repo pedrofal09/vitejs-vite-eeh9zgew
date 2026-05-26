@@ -461,7 +461,7 @@ REGLAS DE RESPUESTA:
 - Para dudas clínicas serias (dolor agudo, refractariedad sin mejora, labs anormales), recomienda consulta médica
 - Mantén foco en sus objetivos: bajar grasa visceral, optimizar T natural, cerrar DRA, mejorar ED ansiogénica, preparar 21K`;
 
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_KEY_STORAGE = "f_gemini_key_v1";
 const COACH_HISTORY_STORAGE = "f_coach_history_v1";
 
