@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 // ========================================================================
-// DATA MASTER — PLAN HÍBRIDO FASE 1 v2.1 (semanas 1-6)
+// DATA MASTER — PLAN HÍBRIDO FASE 1 v2.2 (semanas 1-6)
 // Perfil: Pedro Falcon, 44 años, 80 kg, 170 cm, perímetro 95 cm
 // Clínica: SAHOS severa (IAH residual 0.1-1.6 con CPAP), DRA, ED ansiogénica,
 // Tirzepatide 2.5 mg/sem, restricción lumbar (NO peso muerto, NO back squat,
@@ -15,6 +15,8 @@ import {
 // v2.1 (jun 2026): rebalance tren superior — tríceps directo (6 sets), bíceps
 // upgrade a polea (6 sets), elevación lateral a polea, agrega pájaros polea
 // para deltoide posterior (6 sets totales con face pulls).
+// v2.2 (jun 2026): rebalance tren inferior — pantorrillas gemelos (3 sets Día 1)
+// + sóleo (3 sets Día 2) + curl femoral directo isquios (3 sets Día 2).
 // ========================================================================
 
 const WARMUP_WEIGHTS = [
@@ -41,19 +43,22 @@ const BLOCK_A = [
   { name: "Press Pectoral Multifuncional", sets: 3, reps: "10-12", tempo: "2-1-2-1", rest: "75", yt: "Chest press machine form", notes: "Reemplaza fondos en paralelas. Inclinación ligera del torso para reclutar haz inferior." },
   { name: "Pallof Press Polea Baja", sets: 3, reps: "12/lado", tempo: "2-1-2-1", rest: "45", yt: "Pallof press cable anti rotation", notes: "Anti-rotación pura. Ideal para DRA y blindaje lumbar para correr." },
   { name: "Extensión Tríceps Polea Cuerda", sets: 3, reps: "12-15", tempo: "2-0-2-1", rest: "60", yt: "Tricep rope pushdown cable", notes: "SUPERSET con siguiente. 'Trident muscle pull down' en tu máquina. Codos pegados al torso, extensión completa abajo, contracción isométrica 1 seg." },
-  { name: "Extensión Tríceps Polea Supino una mano", sets: 3, reps: "10-12", tempo: "2-0-2-1", rest: "75", yt: "Single arm tricep cable extension supinated", notes: "SUPERSET. 'Trident muscle expansion' en tu máquina. Agarre supino (palma arriba), una mano. Descanso 60-75s entre supersets." }
+  { name: "Extensión Tríceps Polea Supino una mano", sets: 3, reps: "10-12", tempo: "2-0-2-1", rest: "75", yt: "Single arm tricep cable extension supinated", notes: "SUPERSET. 'Trident muscle expansion' en tu máquina. Agarre supino (palma arriba), una mano. Descanso 60-75s entre supersets." },
+  { name: "Elevación Talones de Pie con Barra", sets: 3, reps: "12-15", tempo: "2-1-2-1", rest: "60", yt: "Standing barbell calf raise form", notes: "GEMELOS (rodilla extendida). Barra a hombros 40-60 kg o mancuernas 15 kg c/mano. Pausa 1 seg arriba, bajada controlada 2 seg. Prevención fascitis plantar y Aquiles." }
 ];
 
 // BLOQUE B — MIÉRCOLES: Tracción y Cadena Posterior
 const BLOCK_B = [
   { name: "Hip Thrust con Barra + Almohadilla", sets: 4, reps: "8-10", tempo: "2-0-X-2", rest: "120", yt: "Barbell hip thrust form glutes", notes: "TU EJERCICIO REY. Empieza 45-55 kg, progresa rápido a 75-85 kg. Pausa isométrica 2 seg en contracción." },
   { name: "RDL con Mancuernas", sets: 3, reps: "10", tempo: "4-1-2-1", rest: "90", yt: "Romanian deadlift dumbbells form", notes: "Mancuernas 20 kg. Bisagra de cadera estricta, columna neutra, isquios estirados. Tempo lento en excéntrica." },
+  { name: "Curl Femoral Multifuncional", sets: 3, reps: "10-12", tempo: "2-1-2-1", rest: "75", yt: "Lying leg curl machine form", notes: "'Leg bending pull' en tu máquina. Acostado boca abajo (o sentado según attachment). ISQUIOS distales (flexión rodilla específica). Pausa 1 seg en contracción." },
   { name: "Jalón al Pecho Multifuncional", sets: 4, reps: "8-10", tempo: "2-1-2-1", rest: "90", yt: "Lat pulldown wide grip form", notes: "Sustituto principal de dominadas. Retracción escapular previa al tirón. Agarre prono ancho." },
   { name: "Remo Bajo en Polea", sets: 4, reps: "10-12", tempo: "2-1-2-1", rest: "75", yt: "Seated cable row neutral grip", notes: "Asa V o agarre estrecho neutro. Pecho fuera, codos pegados al torso." },
   { name: "Face Pulls Polea Alta", sets: 3, reps: "15", tempo: "2-1-2-1", rest: "60", yt: "Face pull rope cable form", notes: "Cuerda o asa simple. Codos altos, rotación externa al final del recorrido." },
   { name: "Farmer's Carry", sets: 3, reps: "40 seg", tempo: "Continuo", rest: "60", yt: "Farmers walk carry form posture", notes: "Mancuernas 20 kg c/mano. Postura erguida, hombros bajos, anti-flexión lateral del core." },
   { name: "Curl Bíceps Polea Baja barra EZ", sets: 3, reps: "10-12", tempo: "2-0-1-1", rest: "60", yt: "EZ bar cable curl", notes: "SUPERSET con siguiente. 'Forehand pull-up' en tu máquina. Polea baja con barra EZ. Tensión constante todo el rango." },
-  { name: "Curl Martillo Polea con cuerda", sets: 3, reps: "10-12", tempo: "2-0-1-1", rest: "75", yt: "Rope hammer curl cable", notes: "SUPERSET. Cuerda en polea baja, agarre neutro (palmas enfrentadas). Activa braquial. Descanso 60-75s entre supersets." }
+  { name: "Curl Martillo Polea con cuerda", sets: 3, reps: "10-12", tempo: "2-0-1-1", rest: "75", yt: "Rope hammer curl cable", notes: "SUPERSET. Cuerda en polea baja, agarre neutro (palmas enfrentadas). Activa braquial. Descanso 60-75s entre supersets." },
+  { name: "Elevación Talones Sentado (sóleo)", sets: 3, reps: "15-20", tempo: "2-1-2-1", rest: "45", yt: "Seated calf raise form", notes: "SÓLEO (rodilla flexionada 90°). Sentado en banco, disco de 10-20 kg o mancuernas encima de rodillas. Reps lentas y completas. Clave para resistencia en Z2 y prevención Aquiles." }
 ];
 
 // BLOQUE C — VIERNES: Hombros y Full Body Metabólico
@@ -339,7 +344,7 @@ RESTRICCIONES ABSOLUTAS:
 - NO heel taps, reverse crunch, hollow hold, elevación piernas colgado (DRA)
 - NO Valsalva agresiva — empeora DRA
 
-PLAN HÍBRIDO FASE 1 v2.1 (semanas 1-6):
+PLAN HÍBRIDO FASE 1 v2.2 (semanas 1-6):
 - Lun: Fuerza A (Empuje + Cuádriceps) PM
 - Mar: Running CACOS/Z2 4 AM
 - Mie: Fuerza B (Tracción + Cadena Posterior) PM
@@ -355,6 +360,12 @@ VOLUMEN SEMANAL TREN SUPERIOR (v2.1):
 - Deltoide medio: 4 sets (polea) · Deltoide posterior: 6 sets (face pulls + pájaros polea)
 - Bíceps: 6 sets (superset polea EZ + martillo polea) · Tríceps: 6 sets (superset polea cuerda + supino)
 - Accesorios en polea para tensión constante, menor fatiga sistémica con SAHOS
+
+VOLUMEN SEMANAL TREN INFERIOR (v2.2):
+- Cuádriceps: 13 sets · Glúteo: 13-15 sets
+- Isquios: 9 sets (RDL + Curl femoral + Swing)
+- Pantorrillas: 6 sets totales (3 gemelos Día 1 + 3 sóleo Día 2)
+- Trabajo bilateral, unilateral y explosivo combinados
 
 EQUIPO DISPONIBLE:
 - Multifuncional 150 lb (press, jalón, polea baja, mariposa, ext/curl pierna)
@@ -944,24 +955,4 @@ export default function App() {
             { id: 'stats', icon: Activity, label: 'Avance' },
             { id: 'coach', icon: Bot, label: 'Coach IA' }
           ].map((item) => (
-            <button key={item.id} onClick={() => { setTab(item.id); setSelectedDay(null); }} className={`flex flex-col items-center justify-center w-[20%] py-4 sm:py-5 transition-all duration-300 ${tab === item.id ? 'text-emerald-400 -translate-y-1' : 'text-slate-500'}`}>
-              <item.icon size={22} className={tab === item.id ? "drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : ""} />
-              <span className="text-[8px] sm:text-[9px] mt-1.5 font-black tracking-widest uppercase w-full text-center truncate px-0.5">{item.label}</span>
-              {tab === item.id && <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-1.5 shadow-[0_0_8px_rgba(52,211,153,1)]"></div>}
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        body { -webkit-tap-highlight-color: transparent; background-color: #fcfdfe; }
-        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}} />
-    </div>
-  );
-}
+ 
