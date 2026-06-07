@@ -955,4 +955,24 @@ export default function App() {
             { id: 'stats', icon: Activity, label: 'Avance' },
             { id: 'coach', icon: Bot, label: 'Coach IA' }
           ].map((item) => (
- 
+            <button key={item.id} onClick={() => { setTab(item.id); setSelectedDay(null); }} className={`flex flex-col items-center justify-center w-[20%] py-4 sm:py-5 transition-all duration-300 ${tab === item.id ? 'text-emerald-400 -translate-y-1' : 'text-slate-500'}`}>
+              <item.icon size={22} className={tab === item.id ? "drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : ""} />
+              <span className="text-[8px] sm:text-[9px] mt-1.5 font-black tracking-widest uppercase w-full text-center truncate px-0.5">{item.label}</span>
+              {tab === item.id && <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-1.5 shadow-[0_0_8px_rgba(52,211,153,1)]"></div>}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        body { -webkit-tap-highlight-color: transparent; background-color: #fcfdfe; }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
+    </div>
+  );
+}
