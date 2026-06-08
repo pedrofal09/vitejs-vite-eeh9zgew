@@ -17,6 +17,8 @@ import {
 // para deltoide posterior (6 sets totales con face pulls).
 // v2.2 (jun 2026): rebalance tren inferior — pantorrillas gemelos (3 sets Día 1)
 // + sóleo (3 sets Día 2) + curl femoral directo isquios (3 sets Día 2).
+// v2.3 (jun 2026): ajustes post-Garmin — duraciones sábado recalibradas, alerta FC>125,
+// drills cadencia 180 spm, caminata 20min post-cena para 8000+ pasos/día.
 // ========================================================================
 
 const WARMUP_WEIGHTS = [
@@ -100,12 +102,12 @@ const SUELO_PELVICO = [
 // SCHEDULE — Plan optimizado: 3 fuerza + 3 running Z2 + 1 descanso absoluto
 const SCHEDULE = [
   { day: "Lunes", type: "Fuerza A: Empuje + Cuádriceps", target: "Testosterona / Cuádriceps", time: "PM", exercises: BLOCK_A, hasWarmup: true, coreDRA: CORE_DRA_LUNES },
-  { day: "Martes", type: "Running CACOS / Z2", target: "Base Aeróbica", time: "4 AM", isRunning: true, zone: "106-123 ppm", duration: "30-35 min", notes: "Sem 1-2: CACOS (4 min trote Z2 + 1 min caminata). Sem 3+: continuo Z2. Sem 4: tempo Z3 baja (20 min) en lugar de HIIT." },
+  { day: "Martes", type: "Running CACOS / Z2", target: "Base Aeróbica", time: "4 AM", isRunning: true, zone: "106-123 ppm", duration: "30-35 min", notes: "Sem 1-2: CACOS (4 min trote Z2 + 1 min caminata). Sem 3+: continuo Z2. Sem 4: tempo Z3 baja (20 min). REGLA Z2: si FC>125 ppm, CAMINA hasta 115. Calentamiento incluye 2×30 seg pasos cortos a 180 spm." },
   { day: "Miércoles", type: "Fuerza B: Tracción + Cadena Posterior", target: "Glúteo / Espalda", time: "PM", exercises: BLOCK_B, hasWarmup: true, coreDRA: CORE_DRA_MIERCOLES },
-  { day: "Jueves", type: "Running Rodaje Z2", target: "Base Lipolítica", time: "4 AM", isRunning: true, zone: "106-123 ppm", duration: "30-40 min", notes: "Trote continuo estricto en Zona 2. Respiración nasal preferida. Sem 6 = deload (-40% volumen)." },
+  { day: "Jueves", type: "Running Rodaje Z2", target: "Base Lipolítica", time: "4 AM", isRunning: true, zone: "106-123 ppm", duration: "30-40 min", notes: "Trote continuo estricto en Zona 2. Respiración nasal. Cada 10 min: 30 seg a 180 spm (zancadas cortas) sin cambiar FC. Sem 6 = deload (-40% volumen)." },
   { day: "Viernes", type: "Fuerza C: Hombros + Metabólico", target: "GH / Postura", time: "PM", exercises: BLOCK_C, hasWarmup: true, coreDRA: CORE_DRA_VIERNES },
-  { day: "Sábado", type: "Running Fondo Z2", target: "Resistencia 21K", time: "AM", isRunning: true, zone: "106-123 ppm", duration: "45-70 min", notes: "Progresión: sem1 45min → sem4 70min. Faja abdominal compresiva durante el rodaje por DRA." },
-  { day: "Domingo", type: "Descanso Absoluto", target: "Recuperación SNC", time: "Libre", isRest: true, notes: "Cero entrenamiento programado. Caminata ligera permitida (<30 min). Foco: sueño, hidratación, comida con familia, suelo pélvico, respiración 4-7-8." }
+  { day: "Sábado", type: "Running Fondo Z2", target: "Resistencia 21K", time: "AM", isRunning: true, zone: "106-123 ppm", duration: "40-70 min", notes: "Progresión recalibrada post-Garmin: sem1 40min → sem2 45 → sem3 55 → sem4 65 → sem5 70 → sem6 deload 35. FC NUNCA pasa 125 ppm — camina si sube. Faja abdominal compresiva por DRA." },
+  { day: "Domingo", type: "Descanso Absoluto", target: "Recuperación SNC", time: "Libre", isRest: true, notes: "Cero fuerza programada. Caminata ligera 30-45 min permitida (cuenta para meta 8000+ pasos/día). Foco: sueño, hidratación, comida con familia, suelo pélvico, respiración 4-7-8." }
 ];
 
 // ========================================================================
@@ -344,7 +346,7 @@ RESTRICCIONES ABSOLUTAS:
 - NO heel taps, reverse crunch, hollow hold, elevación piernas colgado (DRA)
 - NO Valsalva agresiva — empeora DRA
 
-PLAN HÍBRIDO FASE 1 v2.2 (semanas 1-6):
+PLAN HÍBRIDO FASE 1 v2.3 (semanas 1-6, post-Garmin):
 - Lun: Fuerza A (Empuje + Cuádriceps) PM
 - Mar: Running CACOS/Z2 4 AM
 - Mie: Fuerza B (Tracción + Cadena Posterior) PM
@@ -391,7 +393,10 @@ PROTOCOLOS DIARIOS:
 - Bracing 360° en todos los levantamientos pesados
 - Suelo pélvico diario (Kegels + Reverse Kegels, 3 min)
 - Respiración 4-7-8 pre-sueño
-- Caminata ligera permitida en día de descanso
+- Caminata 20 min post-cena (meta 8000+ pasos/día)
+- En carrera: FC NUNCA pasa 125 ppm. Si sube, camina hasta 115.
+- Drills de cadencia: 2×30 seg a 180 spm en calentamiento + 30 seg cada 10 min en rodaje
+- Semáforo VFC matinal: <40ms tres días seguidos = saltar fuerza pesada del día
 
 REGLAS DE RESPUESTA:
 - Responde en español, motivador, científico, al punto
@@ -957,7 +962,6 @@ export default function App() {
           ].map((item) => (
             <button key={item.id} onClick={() => { setTab(item.id); setSelectedDay(null); }} className={`flex flex-col items-center justify-center w-[20%] py-4 sm:py-5 transition-all duration-300 ${tab === item.id ? 'text-emerald-400 -translate-y-1' : 'text-slate-500'}`}>
               <item.icon size={22} className={tab === item.id ? "drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : ""} />
-              <span className="text-[8px] sm:text-[9px] mt-1.5 font-black tracking-widest uppercase w-full text-center truncate px-0.5">{item.label}</span>
               {tab === item.id && <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-1.5 shadow-[0_0_8px_rgba(52,211,153,1)]"></div>}
             </button>
           ))}
