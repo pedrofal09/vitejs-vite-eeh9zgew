@@ -3,7 +3,7 @@ import {
   Home, Dumbbell, Apple, Activity, BookOpen, PlayCircle, Clock, Info,
   ShieldAlert, Zap, Flame, Plus, Trash2, LineChart, Timer, X,
   Pause, Play, CalendarPlus, CheckCircle, ArrowRight, Wind, ChevronRight, ActivitySquare,
-  Camera, Image as ImageIcon, Bot, Send, Loader2, Heart, Moon, Award,
+  Camera, RefreshCw, Image as ImageIcon, Bot, Send, Loader2, Heart, Moon, Award,
   Settings, Bike, Footprints, KeyRound, AlertTriangle, HeartPulse, Stethoscope
 } from 'lucide-react';
 
@@ -48,7 +48,7 @@ const BIKE_COOLDOWN = [
 const BLOCK_A = [
   { name: "Press de Pecho en Multifuncional", sets: 4, reps: "8-10", tempo: "RIR 2", rest: "75", yt: "cable chest press machine form", notes: "SUPERSERIE A1 con Jalón al Pecho (estaciones distintas, no compiten por barra). Controlado, sin tempo fijo — foco técnica + RIR 2." },
   { name: "Jalón al Pecho en Polea Alta", sets: 4, reps: "8-10", tempo: "RIR 2", rest: "75", yt: "lat pulldown cable form", notes: "SUPERSERIE A2 con Press de Pecho. Retracción escapular previa al tirón." },
-  { name: "Press Militar Sentado Mancuernas", sets: 3, reps: "8-10", tempo: "RIR 2", rest: "90", yt: "seated dumbbell shoulder press form", notes: "SUPERSERIE B1 con Remo en Polea. 2ª exposición semanal de empuje vertical (la 1ª es el jueves en máquina)." },
+  { name: "Press Militar Sentado Mancuernas", sets: 3, reps: "8-10", tempo: "RIR 2", rest: "90", yt: "seated dumbbell shoulder press form", notes: "SUPERSERIE B1 con Remo en Polea. 2ª exposición semanal de empuje vertical (la otra es el jueves, press inclinado alto con mancuernas)." },
   { name: "Remo en Polea Baja (agarre neutro)", sets: 3, reps: "10", tempo: "RIR 2", rest: "90", yt: "seated cable row neutral grip", notes: "SUPERSERIE B2 con Press Militar. Codos pegados al torso." },
   { name: "Puente de Glúteo / Hip Thrust ligero (2 piernas)", sets: 3, reps: "10-12", tempo: "Sin apnea", rest: "60", yt: "glute bridge hip thrust two legs", notes: "Bisagra SEGURA: exhala en el empuje, sin hiperextensión ni Valsalva. TECHO RIR≥2-3 y chequeo de coning/doming por serie (DRA no valorada). NO peso muerto, NO extensión 45° cargada. MÍNIMA VIABLE si el tiempo aprieta (25-30 min): Press de Pecho + Jalón + Dead Bug." }
 ];
@@ -63,11 +63,11 @@ const BLOCK_B = [
   { name: "Isquios Excéntrico ASISTIDO (sustituto del Nordic)", sets: 1, reps: "3-5", tempo: "Excéntrico lento", rest: "90", yt: "assisted nordic hamstring curl eccentric", notes: "AL FINAL del día de pierna, 1x/semana. Pre-clearance: SOLO asistido o isométrico, bajo volumen, anclaje de pies estable, progresión muy lenta (el Nordic pleno en solitario = riesgo de DOMS severo y de caída). Nunca la víspera de este día." }
 ];
 
-// BLOQUE C — JUEVES: Full-Body de volumen efectivo en máquina (ANTES de la inyección de Mounjaro)
+// BLOQUE C — JUEVES: Full-Body de volumen efectivo en máquina/mancuerna (ANTES de la inyección de Mounjaro)
 const BLOCK_C = [
   { name: "Prensa o Extensión de Cuádriceps (multifuncional)", sets: 3, reps: "10-12", tempo: "RIR 2", rest: "75", yt: "leg press machine form", notes: "RIR 2 REAL (no de relleno). Bajo estrés espinal, seguro en solitario, DRA-amable." },
-  { name: "Curl Femoral en Máquina", sets: 3, reps: "10-12", tempo: "RIR 2", rest: "75", yt: "lying leg curl machine form", notes: "RIR 2. Segundo estímulo de isquios de la semana." },
-  { name: "Press de Hombro en Máquina", sets: 3, reps: "10", tempo: "RIR 2", rest: "75", yt: "machine shoulder press form", notes: "2ª exposición EFECTIVA de empuje vertical (objetivo ≥10 series duras por patrón/semana)." },
+  { name: "Curl Femoral Tumbado con Mancuerna (banco)", sets: 3, reps: "10-12", tempo: "RIR 2", rest: "75", yt: "dumbbell leg curl on bench form", notes: "Sustituto SIN máquina del curl femoral: boca abajo en el banco, mancuerna sujeta entre los pies. CONCÉNTRICO controlado — sube en 1-2s exhalando, baja en 2s SIN enfatizar el excéntrico (el excéntrico fuerte ya fue el Nordic del miércoles; hoy no se apila DOMS antes de la tirada del domingo ni del valle post-inyección). RIR 2, cero apnea, chequea doming al reacomodar la mancuerna. Si la mancuerna resbala o hay DOMS punzante del Nordic, baja a 2 series o cámbialo por Puente de Isquios a 1 pierna." },
+  { name: "Press Inclinado Alto con Mancuernas (60-75°)", sets: 3, reps: "10", tempo: "RIR 2", rest: "75", yt: "high incline dumbbell press form", notes: "Sustituto SIN máquina del press de hombro: banco a 60-75°, espalda SIEMPRE apoyada en el respaldo y pies firmes (descarga el tronco = mínima presión intraabdominal, gate DRA). Ángulo DISTINTO al press militar 90° del lunes → cuenta como 2ª exposición EFECTIVA de empuje vertical (objetivo ≥10 series duras por patrón/semana). Exhala al empujar, RIR 2 real (día pre-inyección), sin apnea en las últimas reps, vigila doming. Si aparece abombamiento o pesadez pélvica, baja carga o suspende." },
   { name: "Jalón o Remo en Polea", sets: 3, reps: "10-12", tempo: "RIR 2", rest: "75", yt: "cable lat pulldown or seated row machine", notes: "Cierra tracción a 2x/semana efectivas." },
   { name: "Mariposa / Aperturas (Pec Deck)", sets: 2, reps: "12", tempo: "RIR 2", rest: "60", yt: "pec deck fly machine form", notes: "INYECCIÓN MOUNJARO: termina la sesión ≥3-4h ANTES de pincharte; evita una comida proteica grande justo antes (empeora la náusea). Todo en máquina/mancuerna, sin singles pesados ni fallo estructural." }
 ];
@@ -90,7 +90,7 @@ const CORE_DRA_JUEVES = [
 
 // ACCESORIOS DE FUERZA — Martes (tras la carrera Z2): prevención de isquios + salud de hombro
 const ACCESORIOS_MARTES = [
-  { name: "Curl Femoral en Máquina", sets: 3, reps: "12", rest: "60", yt: "lying leg curl machine form", notes: "Isquios ligeros. El Nordic excéntrico se movió al FINAL del día de pierna (miércoles), no aquí, para no dejar DOMS antes de BLOCK_B." },
+  { name: "Puente de Isquios a 1 Pierna (palanca larga)", sets: 3, reps: "12/pierna", rest: "60", yt: "single leg hamstring bridge long lever", notes: "Sustituto SIN máquina, de verdad LIGERO: 12 por pierna, peso corporal, talones LEJOS del glúteo (palanca larga = sesga isquio, no glúteo). Supino = mínima presión sobre la línea alba. Exhala al subir, RIR 3-4, sin apretar el suelo pélvico al máximo, chequea doming en cada serie. Casi sin fase excéntrica: no debe dejar rastro para BLOCK_B del miércoles. El Nordic excéntrico vive al FINAL del miércoles, no aquí, para no dejar DOMS antes de la pierna." },
   { name: "Face Pull / Mariposa Invertida", sets: 2, reps: "15", rest: "45", yt: "face pull rear delt cable form", notes: "Salud de hombro. Rotación externa al final del recorrido." }
 ];
 
@@ -757,6 +757,123 @@ const CoachIA = () => {
 // APP PRINCIPAL
 // ========================================================================
 
+// ── Cámara con temporizador para fotos de progreso (selfies con cuenta regresiva) ──
+function CameraCaptureModal({ label, onCapture, onClose }) {
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const intervalRef = useRef(null);
+  const [facing, setFacing] = useState('user');
+  const [timerSec, setTimerSec] = useState(5);
+  const [count, setCount] = useState(null);
+  const [err, setErr] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setReady(false);
+    setErr(null);
+    const start = async () => {
+      try {
+        if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('no-media');
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: false });
+        if (!active) { stream.getTracks().forEach(t => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setReady(true);
+      } catch (e) {
+        if (active) setErr('No pude acceder a la cámara. Revisa los permisos del navegador o usa el botón Galería.');
+      }
+    };
+    start();
+    return () => {
+      active = false;
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+      if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+    };
+  }, [facing]);
+
+  const capture = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+    const MAX_WIDTH = 500;
+    const scale = MAX_WIDTH / video.videoWidth;
+    const canvas = document.createElement('canvas');
+    canvas.width = MAX_WIDTH;
+    canvas.height = Math.round(video.videoHeight * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    onCapture(canvas.toDataURL('image/jpeg', 0.65));
+  };
+
+  const shoot = () => {
+    if (intervalRef.current || !ready) return;
+    haptic(30);
+    if (timerSec === 0) { capture(); return; }
+    setCount(timerSec);
+    let remaining = timerSec;
+    intervalRef.current = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(intervalRef.current); intervalRef.current = null;
+        if (navigator.vibrate) navigator.vibrate([80, 40, 160]);
+        setCount(null);
+        capture();
+      } else {
+        haptic(30);
+        setCount(remaining);
+      }
+    }, 1000);
+  };
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label={`Cámara para foto ${label}`} className="fixed inset-0 z-[110] bg-black flex flex-col animate-fade-in">
+      <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3">
+        <span className="text-white font-black text-xs uppercase tracking-widest">Foto {label}</span>
+        <button type="button" aria-label="Cerrar cámara" onClick={onClose} className="bg-white/10 text-white min-w-[44px] min-h-[44px] p-3 rounded-full border border-white/20 active:scale-90 flex items-center justify-center"><X size={20} /></button>
+      </div>
+
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+        {err ? (
+          <div className="text-center px-8">
+            <AlertTriangle size={40} className="text-amber-400 mx-auto mb-3" />
+            <p className="text-white/90 text-sm font-bold leading-snug">{err}</p>
+          </div>
+        ) : (
+          <>
+            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={facing === 'user' ? { transform: 'scaleX(-1)' } : undefined} />
+            {count !== null && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <span className="text-white font-black text-[8rem] leading-none tabular-nums drop-shadow-2xl animate-pulse">{count}</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {!err && (
+        <div className="px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-4 bg-black">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            {[0, 3, 5, 10].map(s => (
+              <button key={s} type="button" onClick={() => { haptic(); setTimerSec(s); }} className={`px-3 py-2 rounded-full text-[11px] font-black border ${timerSec === s ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-white/10 text-white/80 border-white/20'} active:scale-95`}>
+                {s === 0 ? 'Sin timer' : `${s}s`}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <button type="button" aria-label="Voltear cámara" onClick={() => { haptic(); setFacing(f => f === 'user' ? 'environment' : 'user'); }} className="bg-white/10 text-white min-w-[52px] min-h-[52px] p-3 rounded-full border border-white/20 active:scale-90 flex items-center justify-center"><RefreshCw size={22} /></button>
+            <button type="button" aria-label="Tomar foto" disabled={!ready || count !== null} onClick={shoot} className="bg-white text-black w-[76px] h-[76px] rounded-full border-4 border-white/40 active:scale-90 flex items-center justify-center shadow-2xl disabled:opacity-40"><Camera size={30} /></button>
+            <div className="min-w-[52px]" />
+          </div>
+          <p className="text-white/50 text-[10px] font-bold text-center mt-3">Cámara frontal para selfies · elige el temporizador y ponte en posición.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState('home');
   const [statTab, setStatTab] = useState('bio');
@@ -772,6 +889,7 @@ export default function App() {
     photoFront: null, photoSide: null, photoBack: null, note: ''
   });
   const [galleryPhoto, setGalleryPhoto] = useState(null);
+  const [cameraSlot, setCameraSlot] = useState(null);
 
   const [cardioLogs, setCardioLogs] = useState(() => JSON.parse(localStorage.getItem('f_cardio_v5')) || []);
   const [cardioForm, setCardioForm] = useState({ mode: 'run', distance: '', time: '', hr: '', elev: '' });
@@ -1176,17 +1294,25 @@ export default function App() {
                       { slot: 'photoBack', label: 'Posterior' }
                     ].map(({ slot, label }) => (
                       <div key={slot} className="relative">
-                        <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-indigo-200 rounded-2xl bg-indigo-50/50 cursor-pointer active:bg-indigo-50 overflow-hidden">
+                        <div className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-indigo-200 rounded-2xl bg-indigo-50/50 overflow-hidden">
                           {form[slot] ? (
                             <img src={form[slot]} alt={label} className="w-full h-full object-cover" />
                           ) : (
                             <div className="flex flex-col items-center justify-center">
-                              <Camera size={20} className="text-indigo-400 mb-1" />
-                              <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{label}</p>
+                              <Camera size={18} className="text-indigo-400 mb-1" />
+                              <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">{label}</p>
                             </div>
                           )}
-                          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload(slot)} aria-label={`Subir foto ${label}`} />
-                        </label>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 mt-1">
+                          <button type="button" onClick={() => { haptic(); setCameraSlot(slot); }} title="Tomar con temporizador" aria-label={`Tomar foto ${label} con la cámara y temporizador`} className="flex items-center justify-center gap-1 h-9 rounded-xl bg-indigo-600 text-white text-[9px] font-black uppercase tracking-wide active:scale-95 shadow-sm">
+                            <Camera size={13} /> Cám
+                          </button>
+                          <label title="Elegir de la galería" className="flex items-center justify-center gap-1 h-9 rounded-xl bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-wide active:scale-95 cursor-pointer border border-slate-200">
+                            <ImageIcon size={13} /> Galería
+                            <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(slot)} aria-label={`Elegir foto ${label} de la galería`} />
+                          </label>
+                        </div>
                         {form[slot] && (
                           <button onClick={() => removePhotoFromCurrentForm(slot)} aria-label={`Quitar foto ${label}`} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md min-h-[24px]">
                             <X size={12} />
@@ -1500,6 +1626,15 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* CÁMARA CON TEMPORIZADOR — fotos de progreso (selfies) */}
+      {cameraSlot && (
+        <CameraCaptureModal
+          label={{ photoFront: 'Frontal', photoSide: 'Lateral', photoBack: 'Posterior' }[cameraSlot]}
+          onClose={() => setCameraSlot(null)}
+          onCapture={(base64) => { setForm(prev => ({ ...prev, [cameraSlot]: base64 })); setCameraSlot(null); hapticSuccess(); }}
+        />
       )}
 
       {/* TIMER FLOTANTE */}
