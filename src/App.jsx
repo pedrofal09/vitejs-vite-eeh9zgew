@@ -9,9 +9,9 @@ import {
 
 // ========================================================================
 // DATA MASTER — PLAN REPROGRAMADO POR ADHERENCIA (ago-2026): noche L-V · día S-D · 4 obligatorios + 2 opcionales
-// Perfil: Pedro Falcón, MÉDICO de profesión · 44 años, 74.4 kg (bajando desde 84), 170 cm, IMC 25.7, ICC 1.00; cintura 92 cm (objetivo <90); ritmo de pérdida ~0.55%/sem (SANO).
-// Composición estimada (antropometría Navy, no DEXA): ~21.5% grasa / ~58 kg masa magra. FOCO: PRESERVAR masa magra — la pérdida de grasa la produce el déficit + tirzepatide, no el entrenamiento.
-// Señal ago-2026: cintura sin bajar con −2.6 kg + semanas de adherencia rota → posible pérdida de magro. Acciones: cinta ESTANDARIZADA (ayunas, 3 medidas, 2 sem), DEXA subida a AHORA, proteína POR RELOJ (2 batidos anclados), reporte CPAP 30 días.
+// Perfil: Pedro Falcón, MÉDICO de profesión · 44 años, 74.4 kg (bajando desde 84), 170 cm, IMC 25.7, ICC 0.98; cintura 89 cm (objetivo <90: ALCANZADO ago-2026), cadera 91, pecho 97, cuello 40; ritmo de pérdida ~0.55%/sem (SANO).
+// Composición estimada (antropometría Navy, no DEXA): ~19% grasa / ~60 kg masa magra. FOCO: PRESERVAR masa magra — la pérdida de grasa la produce el déficit + tirzepatide, no el entrenamiento.
+// Medición ago-2026 (cinta, cintura 89): la señal de pérdida de magro quedó DESACTIVADA — jul→ago fue ~−2.2 kg grasa / ~−0.4 kg magro (preservación excelente). Confirmar tendencia con cinta estandarizada (ayunas, 3 medidas); DEXA vuelve a OPCIONAL (línea de base deseable); proteína POR RELOJ y reporte CPAP 30 días siguen.
 // Clínica: SAHOS severa (IAH residual 0.1-1.6 con CPAP), DRA no valorada aún por fisio, ED ansiogénica.
 // Tirzepatide (Mounjaro) 5 mg/sem — inyección JUEVES AL ACOSTARSE, tras entrenar y cenar (sin regla de separación con la comida; vigilar náusea nocturna la 1ª semana; plan B: viernes AM). Valle de APETITO vie-sáb.
 // ADHERENCIA = métrica #1: fuerza MAR/JUE/SÁB + tirada DOM = OBLIGATORIOS (éxito semanal 4/4); LUN mañana y MIÉ noche = opcionales. La mínima viable CUENTA como cumplido. Regla de los 10 minutos.
@@ -126,10 +126,10 @@ const SCHEDULE = [
 // urgencia: 'Urgente' (días/ya) · 'Prioritaria' (semanas) · 'Condicional' (según hallazgo) · 'Diferida' (a peso estable)
 const VALORACIONES_MEDICAS = [
   { titulo: "Ginecomastia — auto-valorada por Pedro (médico): SIMÉTRICA, palpación normal, sin nódulo sospechoso", especialista: "A criterio de Pedro (Endocrinología si desea caracterización etiológica)", urgencia: "Rutina", pruebas: "Patrón benigno (simétrico + palpación normal) → malignidad muy improbable (esa es unilateral, dura, excéntrica): NO indica imagen ni descarte urgente. Abordaje = caracterización etiológica OPCIONAL en el contexto de pérdida rápida + 5 mg: glandular vs pseudo y balance estradiol/testosterona (ver panel hormonal). Revisar fármacos gineco-inductores.", motivo: "El examen benigno reencuadra: no es descarte de cáncer, es etiología opcional. La testosterona se interpreta mejor con peso estable; no auto-medicar T (empeora la ginecomastia)." },
-  { titulo: "Seguimiento del ritmo de pérdida con el prescriptor (~0,6%/sem = SANO)", especialista: "Endocrinología / bariatría (prescriptor de Mounjaro)", urgencia: "Rutina", pruebas: "Media semanal de peso en la app (nunca pesajes sueltos). Documentar estatus glucémico y fármacos hipoglucemiantes si aplica.", motivo: "El ritmo actual (~0,6%/sem, 77 kg) es sano y sostenible para preservar masa magra — NO acelerarlo aunque el fármaco lo permita. Solo si la media semanal supera ~1%/sem sostenido dos semanas, hablar con el prescriptor para moderar dosis/ritmo o subir proteína." },
-  { titulo: "Clearance CARDIOVASCULAR pre-esfuerzo (gate duro)", especialista: "Cardiología / Medicina del Deporte", urgencia: "Prioritaria", pruebas: "PA con toma ortostática, ECG de reposo, perfil lipídico, glucosa/HbA1c; prueba de esfuerzo a criterio del cardiólogo.", motivo: "SAHOS severa + la ED como posible marcador vascular (no la des por psicógena) lo exigen. Bloquea Z3, back squat con barra y la progresión de volumen hacia el 21K hasta el visto bueno." },
+  { titulo: "Seguimiento del ritmo de pérdida con el prescriptor (~0,55%/sem = SANO)", especialista: "Endocrinología / bariatría (prescriptor de Mounjaro)", urgencia: "Rutina", pruebas: "Media semanal de peso en la app (nunca pesajes sueltos). Documentar estatus glucémico y fármacos hipoglucemiantes si aplica.", motivo: "El ritmo actual (~0,55%/sem, 74.4 kg) es sano y sostenible para preservar masa magra — NO acelerarlo aunque el fármaco lo permita. Solo si la media semanal supera ~1%/sem sostenido dos semanas, hablar con el prescriptor para moderar dosis/ritmo o subir proteína." },
+  { titulo: "Clearance CARDIOVASCULAR pre-esfuerzo (gate duro)", especialista: "Cardiología / Medicina del Deporte", urgencia: "Prioritaria", pruebas: "PA con toma ortostática, ECG de reposo, perfil lipídico, glucosa/HbA1c; prueba de esfuerzo a criterio del cardiólogo.", motivo: "SAHOS severa + la ED como posible marcador vascular (no la des por psicógena) lo exigen. Bloquea Z3, back squat con barra y toda tirada >60 min del plan 10K hasta el visto bueno." },
   { titulo: "Fisioterapia de DRA + suelo pélvico (gate duro)", especialista: "Fisioterapia de abdomen/suelo pélvico", urgencia: "Prioritaria", pruebas: "Distancia inter-rectos, función del transverso, manejo de presión intraabdominal, evaluación de suelo pélvico.", motivo: "Guiar el core sin subir la presión, avanzar al cierre de la DRA y habilitar la carga axial. También relevante para la ED." },
-  { titulo: "Valoración NUTRICIONAL formal (piso proteico + estrategia de valle)", especialista: "Nutrición deportiva / dietista", urgencia: "Prioritaria", pruebas: "Diario de ingesta + síntomas GI + energía + FC reposo 7-14 días; cálculo proteico (~123-170 g/día) y distribución con líquidos en el valle.", motivo: "Con el valle más profundo a 5 mg, proteína 1.6-2.2 g/kg TODOS los días y déficit no agresivo es la palanca principal para preservar masa magra y limitar el empeoramiento de la piel." },
+  { titulo: "Valoración NUTRICIONAL formal (piso proteico + estrategia de valle)", especialista: "Nutrición deportiva / dietista", urgencia: "Prioritaria", pruebas: "Diario de ingesta + síntomas GI + energía + FC reposo 7-14 días; cálculo proteico (~134-164 g/día) y distribución con líquidos en el valle.", motivo: "Con el valle más profundo a 5 mg, proteína 2.0-2.2 g/kg (piso 1.8) TODOS los días y déficit no agresivo es la palanca principal para preservar masa magra y limitar el empeoramiento de la piel." },
   { titulo: "Panel HORMONAL dirigido (condicional a la Etapa 0)", especialista: "Endocrinología / prescriptor", urgencia: "Condicional", pruebas: "En ayuno AM: beta-hCG, estradiol, LH, FSH, prolactina, TSH/T4L, hepático y renal. Testosterona + SHBG con CAUTELA (NO etiquetar hipogonadismo en plena pérdida; reevaluar con peso estable).", motivo: "SOLO si la exploración confirma tejido glandular o hay bandera. Descarta hiperprolactinemia, tiroides, hígado/riñón y tumores productores de hCG/estrógenos. Secuencial, no en escopetazo." },
   { titulo: "Labs nutricionales DIRIGIDOS (aprovechar la misma extracción)", especialista: "Nutrición clínica / Medicina Interna", urgencia: "Condicional", pruebas: "25-OH vit D, B12, ferritina/hierro, HbA1c/glucosa, perfil lipídico, hemograma. Lipasa SOLO si dolor abdominal.", motivo: "Línea base razonable durante el déficit con menor volumen de comida, sin panel amplio 'por si acaso'." },
   { titulo: "Ecografía mamaria — NO indicada con el examen actual", especialista: "Radiología (solo si cambia el patrón)", urgencia: "Condicional", pruebas: "Con tu examen actual (simétrico, palpación normal) NO está indicada. Reservada SOLO si el patrón cambia: se vuelve asimétrico, aparece un nódulo duro/fijo/excéntrico, o hay cambios de pezón/piel.", motivo: "En ginecomastia simétrica benigna la imagen no aporta; se reserva para caracterizar hallazgos indeterminados o descartar malignidad si surgen banderas." },
@@ -212,7 +212,7 @@ const ExerciseCard = ({ ex, index, startTimer }) => {
           </a>
         </div>
 
-        <div className="grid grid-cols-4 gap-2.5 mb-5 font-black text-slate-900">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 font-black text-slate-900">
           {[
             { l: 'Sets', v: ex.sets }, { l: 'Reps', v: ex.reps }, { l: 'RIR', v: ex.tempo }, { l: 'Desc.', v: ex.rest + 's' }
           ].map((item, i) => (
@@ -277,7 +277,12 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
           {SCHEDULE.map((day, idx) => (
             <button key={idx} onClick={() => setSelectedDay(idx)} className={`w-full text-left bg-white border-2 border-slate-50 rounded-[35px] p-7 shadow-sm border-l-[12px] ${day.isRest ? 'border-l-slate-400' : day.isRunning ? 'border-l-orange-500' : day.isBike ? 'border-l-sky-500' : 'border-l-emerald-500'} flex justify-between items-center active:scale-[0.98] transition-all group`}>
               <div>
-                <span className="font-black text-xl text-slate-900 tracking-tighter uppercase group-active:text-emerald-600">{day.day}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-black text-xl text-slate-900 tracking-tighter uppercase group-active:opacity-70">{day.day}</span>
+                  {!day.isRest && (
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${day.type.includes('OBLIGATORIA') ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{day.type.includes('OBLIGATORIA') ? 'Obligatoria' : 'Opcional'}</span>
+                  )}
+                </div>
                 <p className={`font-black text-[11px] uppercase tracking-widest mt-1.5 ${day.isRest ? 'text-slate-500' : day.isRunning ? 'text-orange-600' : day.isBike ? 'text-sky-600' : 'text-emerald-600'}`}>{day.type}</p>
               </div>
               <div className="bg-slate-100 px-4 py-2 rounded-2xl">
@@ -295,12 +300,12 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
     <div className="animate-fade-in space-y-8 pb-10">
       <button onClick={() => setSelectedDay(null)} className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-6 py-3 rounded-[20px] uppercase tracking-widest shadow-sm active:scale-90 transition-all border border-emerald-100">← Volver al Menú</button>
 
-      <div className={`text-white rounded-[55px] p-8 sm:p-10 shadow-2xl border-b-[14px] relative overflow-hidden border border-slate-800 ${dayData.isRest ? 'bg-slate-700 border-slate-500' : 'bg-slate-900 border-emerald-500'}`}>
+      <div className={`text-white rounded-[55px] p-8 sm:p-10 shadow-2xl border-b-[14px] relative overflow-hidden border border-slate-800 ${dayData.isRest ? 'bg-slate-700 border-slate-500' : dayData.isRunning ? 'bg-slate-900 border-orange-500' : dayData.isBike ? 'bg-slate-900 border-sky-500' : 'bg-slate-900 border-emerald-500'}`}>
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mb-24 blur-3xl"></div>
-        <h2 className={`text-4xl sm:text-6xl font-black uppercase tracking-tighter leading-none italic ${dayData.isRest ? 'text-slate-300' : 'text-emerald-400'}`}>{dayData.day}</h2>
+        <h2 className={`text-4xl sm:text-6xl font-black uppercase tracking-tighter leading-none italic ${dayData.isRest ? 'text-slate-300' : dayData.isRunning ? 'text-orange-400' : dayData.isBike ? 'text-sky-400' : 'text-emerald-400'}`}>{dayData.day}</h2>
         <p className="text-xl sm:text-2xl font-bold text-slate-200 mt-3 tracking-tight">{dayData.type}</p>
-        <div className="flex gap-4 mt-8 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-slate-500">
-          <span className="flex items-center bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700 shadow-inner"><Activity size={16} className="mr-3 text-emerald-500" /> {dayData.target}</span>
+        <div className="flex gap-4 mt-8 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">
+          <span className="flex items-start bg-slate-800/80 px-4 py-3 rounded-2xl border border-slate-700 shadow-inner tracking-widest leading-relaxed break-words"><Activity size={16} className="mr-3 mt-0.5 shrink-0 text-emerald-500" /> {dayData.target}</span>
         </div>
       </div>
 
@@ -330,9 +335,9 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
         <div className="space-y-8">
           <div className="bg-gradient-to-br from-orange-600 to-orange-800 text-white p-8 rounded-[45px] shadow-2xl shadow-orange-500/20 border-b-8 border-orange-900">
             <SectionHeader color="text-orange-100" icon={Activity}>Estrategia de Running</SectionHeader>
-            <div className="grid grid-cols-2 gap-5 mt-4">
-              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-2xl font-black">{dayData.duration}</p></div>
-              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-2xl font-black">{dayData.zone}</p></div>
+            <div className="grid grid-cols-1 gap-3 mt-4">
+              <div className="bg-white/10 p-4 rounded-3xl border border-white/10 shadow-inner"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-[13px] font-black leading-snug break-words">{dayData.duration}</p></div>
+              <div className="bg-white/10 p-4 rounded-3xl border border-white/10 shadow-inner"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-[13px] font-black leading-snug break-words">{dayData.zone}</p></div>
             </div>
             {dayData.notes && (
               <div className="mt-5 bg-red-500/20 border border-red-400/50 p-4 rounded-2xl flex items-start">
@@ -394,10 +399,10 @@ const WorkoutView = ({ selectedDay, setSelectedDay, startTimer }) => {
       {dayData.isBike && (
         <div className="space-y-8">
           <div className="bg-gradient-to-br from-sky-600 to-sky-900 text-white p-8 rounded-[45px] shadow-2xl shadow-sky-500/20 border-b-8 border-sky-950">
-            <SectionHeader color="text-sky-100" icon={Bike}>Bici Gravel · Specialized</SectionHeader>
-            <div className="grid grid-cols-2 gap-5 mt-4">
-              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-2xl font-black">{dayData.duration}</p></div>
-              <div className="bg-white/10 p-5 rounded-3xl border border-white/10 shadow-inner text-center"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-2xl font-black">{dayData.zone}</p></div>
+            <SectionHeader color="text-sky-100" icon={Footprints}>Recuperación Activa · Caminata o Bici Suave</SectionHeader>
+            <div className="grid grid-cols-1 gap-3 mt-4">
+              <div className="bg-white/10 p-4 rounded-3xl border border-white/10 shadow-inner"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Duración</p><p className="text-[13px] font-black leading-snug break-words">{dayData.duration}</p></div>
+              <div className="bg-white/10 p-4 rounded-3xl border border-white/10 shadow-inner"><p className="text-[10px] uppercase font-black opacity-60 tracking-widest mb-1">Zona FC</p><p className="text-[13px] font-black leading-snug break-words">{dayData.zone}</p></div>
             </div>
             {dayData.notes && (
               <div className="mt-5 bg-amber-500/20 border border-amber-400/40 p-4 rounded-2xl flex items-start">
@@ -513,7 +518,7 @@ CONTRATO DE ADHERENCIA (recuérdaselo cuando flaquee, sin culpa y sin sermón):
 Éxito semanal = 4/4 obligatorios (Mar/Jue/Sáb/Dom). La MÍNIMA VIABLE cuenta como cumplido: fuerza = 2 primeros ejercicios × 2 series (20-25'); cardio = 15'. Regla de los 10 minutos: el compromiso es cambiarse + 10 min del primer ejercicio, con permiso explícito de parar ahí — con la recompensa atenuada por el fármaco, la motivación llega DESPUÉS de empezar. Ancla nocturna: llegar → cambiarse ANTES de sentarse (el sofá es el punto de no retorno) → snack líquido → entrenar. Registro binario: "aparecí sí/no", nunca kilos ni minutos. Orden de sacrificio si la semana viene rota: Lun → Mié → BONUS del sábado → NUNCA un obligatorio completo.
 
 GATES MÉDICOS DUROS — no negociables, van ANTES de progresar, no después:
-1. Clearance CARDIOVASCULAR (evaluación clínica ± ECG/ergometría) ANTES de cualquier fuerza casi-máxima y de cualquier carrera de calidad/Z3 — no solo antes de "escalar". El perfil de riesgo de Pedro (44 años, perímetro abdominal 92 cm, SAHOS severa, disfunción eréctil como marcador endotelial) lo exige.
+1. Clearance CARDIOVASCULAR (evaluación clínica ± ECG/ergometría) ANTES de cualquier fuerza casi-máxima y de cualquier carrera de calidad/Z3 — no solo antes de "escalar". El perfil de riesgo de Pedro (44 años, cintura 89 cm y bajando, SAHOS severa, disfunción eréctil como marcador endotelial) lo exige.
 2. Valoración de FISIO de diástasis (DRA) y suelo pélvico, con medición basal inter-rectos y ausencia confirmada de doming bajo carga, ANTES de cualquier carga axial progresiva con barra (sentadilla pesada, brace).
 3. Analítica hormonal/metabólica basal con el prescriptor (testosterona total/libre, descartar hipogonadismo) antes de prometer o esperar cambios de testosterona.
 Mientras estos gates no estén cumplidos: sentadilla ligera (goblet/caja) a RIR≥3 con exhalación, nunca brace pesado ni Valsalva; carrera solo en Z2 puro, sin bloques de calidad.
@@ -543,7 +548,7 @@ El viernes se ESPERA una lectura baja (día 1 post-dosis) — descanso duro, no 
 PISO ANTI-CATABÓLICO para semanas malas (más náusea, o semana de escalada de dosis): si todo lo demás se cae, garantiza al menos 2 microsesiones full-body de ~20 minutos en máquina (RIR 3-4, sin buscar DOMS) para no perder masa magra justo cuando el catabolismo del fármaco es más agresivo.
 
 ESCALADA DE DOSIS — VALLE MÁS PROFUNDO Y ANCHO, DELOAD Y RITMO DE PÉRDIDA (Pedro YA está en 5 mg/semana):
-Cada escalada de dosis (2.5 → 5 mg y las siguientes) profundiza y ensancha el valle: la ventana de baja energía/ingesta puede volverse más intensa y derramarse a domingo-lunes, no solo viernes-sábado. Alrededor de la primera dosis a la nueva concentración, indica un DELOAD deliberado de 1-2 semanas: baja el VOLUMEN 30-50% (menos series por grupo) manteniendo la técnica y una intensidad relativa moderada (RIR≥3) — en el valle se MANTIENE el estímulo, no se buscan récords. Pide a Pedro un diario de 7-14 días tras la inyección (energía, náusea/síntomas GI, apetito/ingesta, sueño, FC en reposo/HRV) para RE-MAPEAR la semana real, no la del calendario previo: si la tirada del domingo o la fuerza del martes caen en el nadir real, se mueven, se acortan o se convierten en Z1-Z2 suave/caminata — nunca se fuerzan kilómetros ni series en pleno déficit + valle. Reubica siempre la sesión más exigente en el día de mejor energía y pasa los días valle a máquina, movilidad y Z1-Z2 suave o descanso; autorregula por sensación y FC/HRV, nunca por el calendario. Congela también el VOLUMEN/duración de carrera (no solo la intensidad) hasta el clearance cardiovascular, y PAUSA explícitamente la progresión hacia el 21K durante la escalada y la pérdida rápida (riesgo de baja disponibilidad energética); ese bloque de volumen se retoma solo tras revisar la disponibilidad energética con nutrición/medicina del deporte. Vigila el RITMO de pérdida: Pedro va de 84 a 77 kg (~8%); si el %/semana retrospectivo (calculado con los pesos que registra en la app) supera ~1%/semana sostenido, dile que lo hable HOY con su prescriptor para moderar dosis/ritmo o subir proteína — no esperes 14 días de diario para lanzar esa alerta. Si Pedro es diabético o toma otros fármacos hipoglucemiantes, refuerza las reglas antihipoglucemia (nada de ayuno prolongado, medir peri-entreno). Si la energía cae mucho en el valle, lo primero que se recorta es el CARDIO — nunca la proteína ni el estímulo de fuerza.
+Cada escalada de dosis (2.5 → 5 mg y las siguientes) profundiza y ensancha el valle: la ventana de baja energía/ingesta puede volverse más intensa y derramarse a domingo-lunes, no solo viernes-sábado. Alrededor de la primera dosis a la nueva concentración, indica un DELOAD deliberado de 1-2 semanas: baja el VOLUMEN 30-50% (menos series por grupo) manteniendo la técnica y una intensidad relativa moderada (RIR≥3) — en el valle se MANTIENE el estímulo, no se buscan récords. Pide a Pedro un diario de 7-14 días tras la inyección (energía, náusea/síntomas GI, apetito/ingesta, sueño, FC en reposo/HRV) para RE-MAPEAR la semana real, no la del calendario previo: si la tirada del domingo o la fuerza del martes caen en el nadir real, se mueven, se acortan o se convierten en Z1-Z2 suave/caminata — nunca se fuerzan kilómetros ni series en pleno déficit + valle. Reubica siempre la sesión más exigente en el día de mejor energía y pasa los días valle a máquina, movilidad y Z1-Z2 suave o descanso; autorregula por sensación y FC/HRV, nunca por el calendario. Congela también el VOLUMEN/duración de carrera (no solo la intensidad) hasta el clearance cardiovascular, y PAUSA explícitamente la progresión hacia el 21K durante la escalada y la pérdida rápida (riesgo de baja disponibilidad energética); ese bloque de volumen se retoma solo tras revisar la disponibilidad energética con nutrición/medicina del deporte. Vigila el RITMO de pérdida: Pedro va de 84 a 74.4 kg (~11%); si el %/semana retrospectivo (calculado con los pesos que registra en la app) supera ~1%/semana sostenido, dile que lo hable HOY con su prescriptor para moderar dosis/ritmo o subir proteína — no esperes 14 días de diario para lanzar esa alerta. Si Pedro es diabético o toma otros fármacos hipoglucemiantes, refuerza las reglas antihipoglucemia (nada de ayuno prolongado, medir peri-entreno). Si la energía cae mucho en el valle, lo primero que se recorta es el CARDIO — nunca la proteína ni el estímulo de fuerza.
 
 DATOS OBJETIVOS DE GARMIN (export jul-2026, ~10 semanas) — AUTORREGULA POR READINESS REAL, NO POR EL CALENDARIO:
 Los datos de Pedro corrigen dos supuestos del plan. (1) En estado estable NO tiene un valle fijo viernes-sábado (salvo la ventana transitoria de 1-2 semanas alrededor de una nueva escalada de dosis): su Body Battery y su FC en reposo son PAREJOS toda la semana (FC reposo ~57-61, sin picos por día); si acaso, el JUEVES es su día de recuperación algo más baja, no el fin de semana. Por tanto NO le impongas "descansa Vie-Sáb / carga Lun-Jue" como regla rígida: dile que decida cada día por su Body Battery y su sensación reales — para él la semana es bastante uniforme y puede entrenar fuerza casi cualquier día que amanezca recuperado. (2) Está entrenando sobre todo FUERZA (2-3 sesiones/semana, varias largas de 70-118 min) y corre muy poco (~0,5 carreras/semana), sin bici. Eso está BIEN para preservar masa magra, pero su base de 21K es modesta y está ligeramente en RETROCESO (Garmin predice medio maratón ~2:46, algo peor que hace 3 meses). No le vendas que va camino al 21K: mientras baje de peso rápido el 21K sigue en pausa; correr Z2 fácil es por salud cardiovascular, no para acumular volumen. (3) El peso documentado muestra pérdida RÁPIDA (~2%/semana a fin de marzo; 84→77 en total) — refuerza que confirme el ritmo actual y lo hable con su prescriptor; con tanta fuerza y poca comida en el valle, la proteína y no perder demasiado rápido son lo que protege músculo y piel. Sus sesiones largas de fuerza no son problema mientras la recuperación aguante (y sus datos dicen que aguanta): importa la FRECUENCIA de estímulo + la proteína, no la duración exacta.
@@ -593,7 +598,7 @@ const CoachIA = () => {
       if (Array.isArray(saved) && saved.length) return saved;
     } catch (_) {}
     return [
-      { role: 'model', text: '¡Hola Pedro! Soy tu Coach Bio-Hormonal. Conozco tu plan completo: 3 fuerza + 3 running Z2 + bici gravel dominical, bracing 360° por DRA, back squat ya liberado, stack de 6 suplementos. ¿En qué te ayudo hoy?' }
+      { role: 'model', text: '¡Hola Pedro! Soy tu Coach Bio-Hormonal. Conozco tu plan ago-2026: fuerza Mar/Jue/Sáb + tirada Dom (4 obligatorios — la mínima viable cuenta), Lun y Mié opcionales, inyección el jueves al acostarte, bracing 360° por DRA y sentadilla con barra solo LIGERA hasta cumplir tus gates médicos. ¿En qué te ayudo hoy?' }
     ];
   });
   const [input, setInput] = useState('');
@@ -691,7 +696,7 @@ const CoachIA = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)]">
+    <div className="flex flex-col h-[calc(100dvh-180px)]">
       <div className="bg-indigo-600 text-white p-8 rounded-[40px] shadow-lg border-b-[10px] border-indigo-800 mb-4 shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         <div className="flex justify-between items-start">
@@ -774,7 +779,7 @@ const CoachIA = () => {
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Pregúntame sobre tu plan..."
           aria-label="Mensaje al Coach"
-          className="flex-1 bg-transparent px-4 text-sm font-bold text-slate-700 outline-none min-h-[44px]"
+          className="flex-1 min-w-0 bg-transparent px-4 text-base font-bold text-slate-700 outline-none min-h-[44px]"
         />
         <button onClick={handleSend} disabled={isLoading || !input.trim()} aria-label="Enviar mensaje" className="bg-indigo-500 text-white min-w-[44px] min-h-[44px] p-3 rounded-full shadow-md active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center">
           <Send size={18} />
@@ -1085,7 +1090,7 @@ export default function App() {
             <div className="bg-red-50 border-2 border-red-200 rounded-[28px] p-5 shadow-sm">
               <SectionHeader icon={ShieldAlert} color="text-red-500">Gates médicos antes de cargar pesado</SectionHeader>
               <div className="space-y-2 text-[11px] font-bold text-red-900">
-                <p>1. <span className="font-black">Clearance cardiovascular</span> antes de fuerza casi-máxima y de calidad Z3 (44 años, perímetro 95, SAHOS, ED).</p>
+                <p>1. <span className="font-black">Clearance cardiovascular</span> antes de fuerza casi-máxima y de calidad Z3 (44 años, cintura 89 y bajando, SAHOS severa, ED como marcador vascular).</p>
                 <p>2. <span className="font-black">Fisio de DRA + suelo pélvico</span> con medición inter-rectos antes de sentadilla pesada con barra.</p>
                 <p>3. <span className="font-black">Labs basales</span> (testosterona total/libre) con tu médico antes de esperar cambios hormonales.</p>
                 <p className="text-red-700 italic pt-1">Hasta cumplirlos: sentadilla ligera (goblet/caja) RIR≥3 con exhalación, y carrera solo Z2 puro.</p>
@@ -1096,7 +1101,7 @@ export default function App() {
               <SectionHeader icon={Activity} color="text-emerald-500">Ajuste según tus datos Garmin (10 sem)</SectionHeader>
               <div className="space-y-1.5 text-[11px] font-bold text-slate-600">
                 <p><span className="text-emerald-600 font-black">Recuperación PAREJA</span> — Body Battery y FC reposo no muestran un valle fijo Vie-Sáb; el jueves es tu día algo más bajo. Autorregula por tu readiness real, no por el calendario.</p>
-                <p><span className="text-emerald-600 font-black">Pérdida SANA</span> (~0,6%/sem; 77 kg). Ritmo ideal para preservar músculo — mantenlo, no lo aceleres. Sigue con media semanal de peso + perímetros.</p>
+                <p><span className="text-emerald-600 font-black">Pérdida SANA</span> (~0,55%/sem; 74.4 kg). Ritmo ideal para preservar músculo — mantenlo, no lo aceleres. Sigue con media semanal de peso + perímetros.</p>
                 <p><span className="text-sky-600 font-black">Meta 10K</span> (no 21K): 2 carreras Z2 fáciles/sem — Mié corta de noche + Dom tirada de mañana (en reset). Bici = alternativa del Mié o del Lun. Suficiente para el 10K sin robar recuperación a la fuerza.</p>
                 <p><span className="text-amber-600 font-black">Fuerza = tu ancla</span>: 2-3 sesiones/sem (frecuencia + proteína preservan músculo). Tus sesiones largas están bien: la recuperación aguanta.</p>
                 <p className="text-slate-400 italic pt-1">Valoraciones médicas → pestaña <span className="font-black text-slate-500">Salud</span>.</p>
@@ -1106,7 +1111,7 @@ export default function App() {
             <div className="bg-purple-50 border border-purple-100 rounded-[28px] p-5 shadow-sm">
               <SectionHeader icon={Heart} color="text-purple-500">Recordatorio Diario</SectionHeader>
               <div className="space-y-2 text-[11px] font-bold text-purple-900">
-                <p>• <span className="font-black">Proteína</span>: 1.6-2.2 g/kg CADA día (no se "banca"); líquida Vie-Sáb</p>
+                <p>• <span className="font-black">Proteína</span>: 2.0-2.2 g/kg CADA día (piso 1.8 en día malo) (no se "banca"); líquida Vie-Sáb</p>
                 <p>• <span className="font-black">Hidratación + electrolitos</span> todo el valle (Vie-Sáb)</p>
                 <p>• <span className="font-black">Dormir 7h con CPAP</span> — gana sobre cualquier sesión</p>
                 <p>• <span className="font-black">Core DRA-safe</span>: nada de crunch ni Valsalva agresiva</p>
@@ -1126,7 +1131,12 @@ export default function App() {
                     className={`w-full text-left bg-white p-5 sm:p-7 rounded-[30px] sm:rounded-[40px] border border-slate-100 shadow-sm flex justify-between items-center border-l-[10px] sm:border-l-[14px] ${d.isRest ? 'border-l-slate-400' : d.isRunning ? 'border-l-orange-500' : d.isBike ? 'border-l-sky-500' : 'border-l-emerald-500'} active:scale-[0.97] transition-transform duration-150 hover:shadow-md`}
                   >
                     <div>
-                      <p className="font-black text-slate-900 text-xl sm:text-2xl leading-none tracking-tighter uppercase">{d.day}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-black text-slate-900 text-xl sm:text-2xl leading-none tracking-tighter uppercase">{d.day}</p>
+                        {!d.isRest && (
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${d.type.includes('OBLIGATORIA') ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{d.type.includes('OBLIGATORIA') ? 'Obligatoria' : 'Opcional'}</span>
+                        )}
+                      </div>
                       <p className={`text-[11px] sm:text-[12px] font-black mt-2 sm:mt-2.5 uppercase tracking-widest leading-none ${d.isRest ? 'text-slate-500' : d.isRunning ? 'text-orange-600' : d.isBike ? 'text-sky-600' : 'text-emerald-600'}`}>{d.type}</p>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-3">
@@ -1160,14 +1170,14 @@ export default function App() {
             <div className="bg-slate-900 text-white rounded-[45px] sm:rounded-[55px] p-10 sm:p-12 text-center shadow-xl border-b-[12px] border-emerald-500 relative overflow-hidden border border-slate-800">
               <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-400/10 rounded-full -mr-20 -mt-20 blur-[80px]"></div>
               <h2 className="text-7xl sm:text-8xl font-black text-emerald-400 tracking-tighter leading-none italic drop-shadow-md">160<span className="text-2xl sm:text-3xl ml-1 uppercase tracking-normal text-white">g</span></h2>
-              <p className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] text-slate-500 mt-6 opacity-80 leading-none">Proteína · 2.0–2.2 g/kg (155-170 g) · piso 1.8 en día malo</p>
+              <p className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] text-slate-300 mt-6 leading-none">Proteína · 2.0–2.2 g/kg (155-170 g) · piso 1.8 en día malo</p>
               <p className="text-[10px] sm:text-[11px] font-bold text-emerald-300/80 mt-3 italic">Seguro anti-catabólico #1 bajo Tirzepatide — NO se "banca" entre días</p>
             </div>
 
             <SectionHeader icon={Apple}>Distribución Proteica</SectionHeader>
             <div className="bg-white p-6 sm:p-8 rounded-[35px] sm:rounded-[45px] border border-slate-100 shadow-sm flex items-center transition-all active:bg-slate-50">
               <div className="bg-orange-50 p-4 sm:p-5 rounded-[25px] mr-5 sm:mr-7 shrink-0 shadow-inner border border-orange-100"><Apple className="text-orange-500" size={32} /></div>
-              <div><h3 className="font-black text-slate-900 uppercase text-sm sm:text-base tracking-tight leading-none">Lun-Jue · Sólidos (objetivo pleno)</h3><p className="text-[11px] sm:text-[13px] text-slate-500 font-bold leading-tight mt-1.5 italic">Días de alta tolerancia: apunta a 2.0-2.2 g/kg (155-170 g). 3 huevos + 200 g proteína magra por comida, en 4 tomas de 38-45 g. Carbohidrato peri-entreno el miércoles (piernas) y martes (carrera).</p></div>
+              <div><h3 className="font-black text-slate-900 uppercase text-sm sm:text-base tracking-tight leading-none">Lun-Jue · Sólidos (objetivo pleno)</h3><p className="text-[11px] sm:text-[13px] text-slate-500 font-bold leading-tight mt-1.5 italic">Días de alta tolerancia: apunta a 2.0-2.2 g/kg (155-170 g). 3 huevos + 200 g proteína magra por comida, en 4 tomas de 38-45 g. Carbohidrato peri-entreno el jueves (pierna) y el miércoles (carrera).</p></div>
             </div>
 
             <div className="bg-white p-6 sm:p-8 rounded-[35px] sm:rounded-[45px] border border-slate-100 shadow-sm flex items-center transition-all active:bg-slate-50">
@@ -1180,12 +1190,12 @@ export default function App() {
 
             <div className="bg-amber-50 border border-amber-200 rounded-[35px] p-6 shadow-sm">
               <SectionHeader icon={AlertTriangle} color="text-amber-600">Estrategia del Valle (Vie-Sáb)</SectionHeader>
-              <p className="text-[12px] font-bold text-amber-900 leading-snug">Con la saciedad del Mounjaro, "proteína primero" en formatos líquidos/blandos: whey isolate, skyr, yogur griego, requesón, batidos, caldos y sopas fortificadas. Tomas pequeñas y frecuentes hacia 1.6-2.0 g/kg. La náusea puede impedir llegar — el objetivo es MINIMIZAR el déficit, no fingir que desaparece. Hidratación + electrolitos proactivos todos los días del valle.</p>
+              <p className="text-[12px] font-bold text-amber-900 leading-snug">Con la saciedad del Mounjaro, "proteína primero" en formatos líquidos/blandos: whey isolate, skyr, yogur griego, requesón, batidos, caldos y sopas fortificadas. Tomas pequeñas y frecuentes hacia 2.0 g/kg (piso 1.8). La náusea puede impedir llegar — el objetivo es MINIMIZAR el déficit, no fingir que desaparece. Hidratación + electrolitos proactivos todos los días del valle.</p>
             </div>
 
             <div className="bg-slate-900 text-white rounded-[35px] p-6 shadow-sm border border-slate-800">
               <SectionHeader icon={Zap} color="text-emerald-400">Jueves · timing de la inyección</SectionHeader>
-              <p className="text-[12px] font-bold text-slate-200 leading-snug">Entrena ANTES de inyectar Mounjaro, terminando ≥3-4h antes. NO comas una comida proteica grande justo antes de pincharte (empeora la náusea). Domingo: carbohidrato 2-3h antes de la tirada larga. Cena ligera y temprana antes del CPAP para no fragmentar el sueño.</p>
+              <p className="text-[12px] font-bold text-slate-200 leading-snug">Jueves: entrena pierna 19:00-20:30 → cena NORMAL post-entreno → CPAP e inyección AL ACOSTARSE (22:30-23:00), sin regla de separación con la comida (la 1ª semana vigila náusea nocturna; plan B con tu prescriptor: viernes AM). Domingo: 20-30 g de carbohidrato antes de la tirada, no en ayunas. Cena ligera y temprana antes del CPAP para no fragmentar el sueño.</p>
             </div>
 
             <div className="bg-slate-900 p-8 sm:p-10 rounded-[45px] sm:rounded-[55px] text-white shadow-2xl border border-slate-800">
@@ -1240,19 +1250,19 @@ export default function App() {
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">1. Medidas Base & Descanso</h4>
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Altura (m)</label>
-                      <input type="number" step="0.01" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="1.70" />
+                      <label className="text-[10px] font-black text-slate-600 uppercase ml-2 tracking-[0.1em]">Altura (m)</label>
+                      <input type="number" step="0.01" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="1.70" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Peso (kg)</label>
-                      <input type="number" step="0.1" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
+                      <label className="text-[10px] font-black text-slate-600 uppercase ml-2 tracking-[0.1em]">Peso (kg)</label>
+                      <input type="number" step="0.1" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="00.0" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-indigo-500 uppercase ml-2 tracking-[0.1em]">IAH (CPAP)</label>
-                      <input type="number" step="0.1" value={form.iah} onChange={e => setForm({ ...form, iah: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
+                      <input type="number" step="0.1" value={form.iah} onChange={e => setForm({ ...form, iah: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-black outline-none focus:border-indigo-500 transition-all text-center shadow-inner font-mono" placeholder="0.0" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Erección</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase ml-2 tracking-[0.1em]">Erección</label>
                       <select value={form.erec} onChange={e => setForm({ ...form, erec: e.target.value })} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black outline-none appearance-none text-center shadow-inner">
                         <option>Sí</option><option>No</option>
                       </select>
@@ -1354,11 +1364,11 @@ export default function App() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-[0.1em]">Nota subjetiva (energía, libido, sueño...)</label>
+                    <label className="text-[10px] font-black text-slate-600 uppercase ml-2 tracking-[0.1em]">Nota subjetiva (energía, libido, sueño...)</label>
                     <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} rows={2} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-indigo-500 shadow-inner mt-1" placeholder="Ej: dormí 7h, energía 8/10, sin doming en hip thrust." />
                   </div>
 
-                  <button onClick={saveMetrics} className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-indigo-500/30 uppercase tracking-[0.2em] mt-1 transition-all border-b-4 border-indigo-800">
+                  <button onClick={saveMetrics} disabled={!form.weight} className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-black text-xs active:scale-95 shadow-md shadow-indigo-500/30 uppercase tracking-[0.2em] mt-1 transition-all border-b-4 border-indigo-800 disabled:opacity-40 disabled:active:scale-100">
                     Guardar Evaluación
                   </button>
                 </div>
@@ -1455,7 +1465,7 @@ export default function App() {
                             <span className="text-xs font-black text-slate-800 uppercase tracking-widest">{l.date}</span>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-bold text-slate-400 uppercase">Erec: <span className="text-slate-700">{l.erec}</span> | IAH: <span className="text-indigo-500">{l.iah || '-'}</span></span>
-                              <button onClick={() => deleteLog(l.id)} className="text-red-400 hover:text-red-600 active:scale-90" aria-label="Eliminar evaluación"><Trash2 size={14} /></button>
+                              <button onClick={() => deleteLog(l.id)} className="text-red-400 hover:text-red-600 active:scale-90 min-w-[44px] min-h-[44px] -my-3 inline-flex items-center justify-center" aria-label="Eliminar evaluación"><Trash2 size={16} /></button>
                             </div>
                           </div>
                           <div className="flex items-start space-x-3">
@@ -1510,28 +1520,28 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-tight">Dist (km)</label>
-                    <input type="number" step="0.01" value={cardioForm.distance} onChange={e => setCardioForm({ ...cardioForm, distance: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '30.0' : '5.0'} />
+                    <input type="number" step="0.01" value={cardioForm.distance} onChange={e => setCardioForm({ ...cardioForm, distance: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '30.0' : '5.0'} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-tight">Tiempo (min)</label>
-                    <input type="number" value={cardioForm.time} onChange={e => setCardioForm({ ...cardioForm, time: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '90' : '45'} />
+                    <input type="number" value={cardioForm.time} onChange={e => setCardioForm({ ...cardioForm, time: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-black outline-none focus:border-orange-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '90' : '45'} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-red-500 uppercase ml-1 tracking-tight">FC media (ppm)</label>
-                    <input type="number" value={cardioForm.hr} onChange={e => setCardioForm({ ...cardioForm, hr: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black outline-none focus:border-red-500 transition-all text-center shadow-inner font-mono text-red-600" placeholder={cardioForm.mode === 'bike' ? '110' : '115'} />
+                    <input type="number" value={cardioForm.hr} onChange={e => setCardioForm({ ...cardioForm, hr: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-black outline-none focus:border-red-500 transition-all text-center shadow-inner font-mono text-red-600" placeholder={cardioForm.mode === 'bike' ? '110' : '115'} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-tight">{cardioForm.mode === 'bike' ? 'Desnivel (m)' : 'Cad/Paso'}</label>
-                    <input type="number" value={cardioForm.elev} onChange={e => setCardioForm({ ...cardioForm, elev: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '350' : '175'} />
+                    <input type="number" value={cardioForm.elev} onChange={e => setCardioForm({ ...cardioForm, elev: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-black outline-none focus:border-emerald-500 transition-all text-center shadow-inner font-mono" placeholder={cardioForm.mode === 'bike' ? '350' : '175'} />
                   </div>
                 </div>
-                <button onClick={saveCardio} className={`w-full p-3.5 rounded-xl text-white font-black text-xs active:scale-95 shadow-md uppercase tracking-[0.2em] mt-1 transition-all border-b-4 ${cardioForm.mode === 'bike' ? 'bg-sky-500 shadow-sky-500/30 border-sky-700' : 'bg-orange-500 shadow-orange-500/30 border-orange-700'}`}>
+                <button onClick={saveCardio} disabled={!cardioForm.distance || !cardioForm.time} className={`w-full p-3.5 rounded-xl text-white font-black text-xs active:scale-95 shadow-md uppercase tracking-[0.2em] mt-1 transition-all border-b-4 disabled:opacity-40 disabled:active:scale-100 ${cardioForm.mode === 'bike' ? 'bg-sky-500 shadow-sky-500/30 border-sky-700' : 'bg-orange-500 shadow-orange-500/30 border-orange-700'}`}>
                   Guardar {cardioForm.mode === 'bike' ? 'Salida Bici' : 'Carrera'}
                 </button>
 
                 {cardioLogs.length > 0 && (
-                  <div className="mt-5 overflow-hidden rounded-2xl border border-slate-100 shadow-sm bg-white">
-                    <table className="w-full text-left text-[10px] sm:text-[11px]">
+                  <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-100 shadow-sm bg-white">
+                    <table className="w-full min-w-[360px] text-left text-[10px] sm:text-[11px]">
                       <thead className="bg-slate-900 text-white font-black uppercase tracking-widest">
                         <tr className="border-b border-slate-800">
                           <th className="px-1 py-3 text-center">Tipo</th>
@@ -1564,7 +1574,7 @@ export default function App() {
                               </td>
                               <td className="px-1 py-3 text-center text-red-600">{l.hr || '-'}</td>
                               <td className="px-1 py-3 text-center">
-                                <button onClick={() => deleteCardio(l.id)} aria-label="Eliminar sesión" className="text-slate-300 hover:text-red-500 active:scale-90"><Trash2 size={12} /></button>
+                                <button onClick={() => deleteCardio(l.id)} aria-label="Eliminar sesión" className="text-slate-500 hover:text-red-500 active:scale-90 min-w-[44px] min-h-[44px] -my-3 inline-flex items-center justify-center"><Trash2 size={14} /></button>
                               </td>
                             </tr>
                           );
@@ -1649,7 +1659,7 @@ export default function App() {
             <X size={20} />
           </button>
           <div className="max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <img src={galleryPhoto.data} alt={galleryPhoto.type} className="w-full rounded-3xl shadow-2xl" />
+            <img src={galleryPhoto.data} alt={galleryPhoto.type} className="w-full max-h-[62vh] object-contain rounded-3xl shadow-2xl" />
             <div className="mt-4 bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20 text-white text-center">
               <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{galleryPhoto.type}</p>
               <p className="text-lg font-black mt-1">{galleryPhoto.date}</p>
@@ -1670,7 +1680,7 @@ export default function App() {
 
       {/* TIMER FLOTANTE */}
       {(timer > 0 || isRunning) && (
-        <div role="timer" aria-live="polite" aria-label={`Descanso ${Math.floor(timer / 60)} minutos ${timer % 60} segundos`} className="fixed bottom-[85px] sm:bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex items-center justify-between z-50 border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
+        <div role="timer" aria-live="polite" aria-label={`Descanso ${Math.floor(timer / 60)} minutos ${timer % 60} segundos`} className="fixed bottom-[calc(85px+env(safe-area-inset-bottom))] sm:bottom-[calc(7rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-slate-900 text-white px-5 py-4 sm:px-6 sm:py-5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex items-center justify-between z-50 border-2 border-emerald-500/30 animate-fade-in backdrop-blur-2xl bg-opacity-95 ring-4 ring-slate-900/40">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative">
               <Timer size={28} className={timer === 0 ? "text-red-500 animate-pulse" : "text-emerald-400"} />
